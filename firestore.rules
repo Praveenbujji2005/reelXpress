@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper to validate incoming customer enquiries
+    function isValidEnquiry() {
+      let data = request.resource.data;
+      let hasValidName = (data.customerName is string && data.customerName.size() >= 2) ||
+                         (data.fullName is string && data.fullName.size() >= 2);
+      let hasValidEmail = data.email is string && data.email.matches('^.+@.+\\..+$');
+      let hasValidPhone = data.phone is string && data.phone.size() >= 10;
+      let hasValidService = (data.selectedService is string && data.selectedService.size() >= 2) ||
+                            (data.serviceType is string && data.serviceType.size() >= 2);
+      return hasValidName && hasValidEmail && hasValidPhone && hasValidService;
+    }
+
+    // =========================================================================
+    // Contact Form Enquiries:
+    // - Public can CREATE (submit) new enquiries with strict validation
+    // - Authenticated Administrators can READ, UPDATE, or DELETE enquiries
+    // =========================================================================
+    match /enquiries/{enquiryId} {
+      allow create: if isValidEnquiry();
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // Backward compatibility for legacy inquiries collection
+    match /inquiries/{inquiryId} {
+      allow create: if isValidEnquiry();
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // =========================================================================
+    // Dynamic Website Content (CMS: Hero Slides, Pricing, FAQs, Testimonials):
+    // - Public can READ published content to view the live website
+    // - Authenticated Administrators can CREATE, UPDATE, or DELETE content
+    // =========================================================================
+    match /cms_hero/{slideId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /cms_pricing/{planId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /cms_faqs/{faqId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /cms_testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // =========================================================================
+    // Admin Activity Audit Logs:
+    // - Authenticated Administrators can create or read audit trails
+    // =========================================================================
+    match /activity_logs/{logId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if false; // Audit logs are immutable
+    }
+
+    // Default rule
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

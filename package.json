@@ -1,0 +1,29 @@
+{
+  "name": "reelexpress-website",
+  "version": "1.0.0",
+  "description": "India's 1st Reel-Maker Booking Platform - Next.js Conversion",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "autoprefixer": "^10.6.1",
+    "canvas-confetti": "^1.9.4",
+    "firebase": "^13.1.0",
+    "lenis": "^1.3.27",
+    "next": "^16.4.2",
+    "postcss": "^8.5.31",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.2"
+  }
+}

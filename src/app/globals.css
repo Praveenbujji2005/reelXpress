@@ -1,0 +1,1203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   ReelExpress | Modern Cinematic Luxe Design System
+   India's 1st Reel-Maker Booking Platform
+   Converted to Next.js App Router
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Core Layout & Base Rules
+   -------------------------------------------------------------------------- */
+:root {
+  --color-primary: #ffb599;
+  --color-primary-container: #ff6d29;
+  --color-surface-base: #161316;
+  --color-background: #151215;
+  --color-surface-deep: #0e0c0e;
+  --color-border-specular: rgba(255, 255, 255, 0.12);
+  --color-border-amber: rgba(255, 109, 41, 0.35);
+}
+
+/* Smooth scrolling wrapped in prefers-reduced-motion check */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* Lenis Smooth Scrolling Optimizations */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+body {
+  background-color: #151215;
+  color: #ffffff;
+  overflow-x: hidden;
+  overflow-x: clip;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Scroll margin offset for fixed/sticky header on all anchor targets */
+#services,
+#pricing,
+#testimonials,
+#faq,
+#booking,
+#showcase,
+section[id] {
+  scroll-margin-top: 5.5rem; /* ~88px offset so sticky header does not overlap headings */
+}
+
+@media (max-width: 640px) {
+  #services,
+  #pricing,
+  #testimonials,
+  #faq,
+  #booking,
+  #showcase,
+  section[id] {
+    scroll-margin-top: 5rem; /* ~80px offset on mobile */
+  }
+}
+
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined[data-weight="fill"] {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* --------------------------------------------------------------------------
+   2. Scroll Progress Bar (GPU Accelerated Transform)
+   -------------------------------------------------------------------------- */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #ff6d29, #ffb599, #ffffff);
+  box-shadow: 0 0 12px rgba(255, 109, 41, 0.9), 0 0 24px rgba(255, 109, 41, 0.5);
+  z-index: 100;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+   3. Ambient Cinematic Backdrops & Patterns
+   -------------------------------------------------------------------------- */
+.glow-radial-orange {
+  background: radial-gradient(circle, rgba(255, 109, 41, 0.22) 0%, rgba(22, 19, 22, 0) 70%);
+}
+
+.glow-radial-bottomleft {
+  background: radial-gradient(circle at 10% 90%, rgba(255, 109, 41, 0.18) 0%, rgba(69, 48, 39, 0.08) 45%, rgba(21, 18, 21, 0) 75%);
+}
+
+.bg-grid-faint {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Text & Button Shimmer Effects
+   -------------------------------------------------------------------------- */
+@keyframes textShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #ff6d29 0%, #ffb599 22%, #ffffff 50%, #ffb599 78%, #ff6d29 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 6s ease-in-out infinite;
+}
+
+@keyframes btnShineSweep {
+  0% { transform: translateX(-150%) skewX(-20deg); opacity: 0; }
+  30% { opacity: 0.6; }
+  60%, 100% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
+}
+
+.btn-shine-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine-sweep::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: btnShineSweep 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   5. Organic Ambient Floating Orbs
+   -------------------------------------------------------------------------- */
+@keyframes orbFloat1 {
+  0% { transform: translate3d(-50%, 0, 0) scale(1); }
+  50% { transform: translate3d(calc(-50% + 40px), 30px, 0) scale(1.08); }
+  100% { transform: translate3d(-50%, 0, 0) scale(1); }
+}
+
+@keyframes orbFloat2 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-35px, 45px, 0) scale(1.12); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes orbFloat3 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(50px, -40px, 0) scale(0.92); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+.animate-orb-1 { animation: orbFloat1 18s ease-in-out infinite; }
+.animate-orb-2 { animation: orbFloat2 22s ease-in-out infinite; }
+.animate-orb-3 { animation: orbFloat3 26s ease-in-out infinite; }
+
+/* --------------------------------------------------------------------------
+   6. Glass Specular Spotlight Card Effect
+   -------------------------------------------------------------------------- */
+.spotlight-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    420px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+    rgba(255, 109, 41, 0.65),
+    rgba(255, 255, 255, 0.15) 35%,
+    transparent 75%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    500px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+    rgba(255, 109, 41, 0.08),
+    transparent 65%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 0;
+}
+
+.spotlight-card:hover::after {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   7. Reference 2 Overlapping Fanned-Out Portfolio Carousel
+   -------------------------------------------------------------------------- */
+#fanned-carousel-container {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+#fanned-carousel-track {
+  position: relative;
+  width: 100%;
+  height: 590px;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  #fanned-carousel-track { height: 540px; }
+}
+@media (max-width: 900px) {
+  #fanned-carousel-track { height: 490px; }
+}
+@media (max-width: 640px) {
+  #fanned-carousel-container {
+    overflow: hidden;
+  }
+  #fanned-carousel-track {
+    height: 480px;
+    perspective: none !important;
+    transform-style: flat !important;
+  }
+}
+@media (max-width: 380px) {
+  #fanned-carousel-track { height: 440px; }
+}
+
+/* Individual Fanned Portrait Card */
+.fanned-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 290px;
+  aspect-ratio: 9/16;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #110e11;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transform-origin: center center;
+  transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1),
+              opacity 0.45s ease,
+              filter 0.45s ease,
+              box-shadow 0.45s ease,
+              border-color 0.3s ease;
+  will-change: transform, opacity;
+}
+
+/* Active card subtle highlight without any bright orange border */
+.fanned-card.is-active {
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 30px 75px rgba(0, 0, 0, 0.9), 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Hover on ANY card: brings to foreground, scales, straightens rotation, lifts z-index */
+@media (hover: hover) and (pointer: fine) {
+  .fanned-card:hover {
+    transform: translateX(calc(-50% + var(--slot-tx, 0px)))
+               translateY(calc(-50% - 16px))
+               scale(calc(var(--slot-scale, 1) * 1.08))
+               rotate(0deg) !important;
+    z-index: 55 !important;
+    box-shadow: 0 35px 85px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    filter: brightness(1.05) contrast(1.02) !important;
+  }
+}
+
+/* Dragging state */
+.is-dragging .fanned-card {
+  transition: none !important;
+  pointer-events: none;
+}
+
+/* Responsive card sizing */
+@media (max-width: 1200px) {
+  .fanned-card {
+    width: 260px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 900px) {
+  .fanned-card {
+    width: 235px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .fanned-card {
+    width: min(240px, 68vw);
+    border-radius: 18px;
+  }
+  .fanned-card h3 {
+    font-size: 0.925rem;
+    line-height: 1.25;
+    margin-bottom: 0.2rem;
+  }
+  .fanned-card p {
+    font-size: 0.725rem;
+    margin-bottom: 0.35rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .fanned-card {
+    width: min(215px, 68vw);
+    border-radius: 16px;
+  }
+}
+
+/* Media inside card */
+.fanned-card video,
+.fanned-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+/* Pagination Dots */
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.28);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.25);
+}
+
+.carousel-dot.active {
+  width: 28px;
+  background: #ff6d29;
+  box-shadow: 0 0 12px rgba(255, 109, 41, 0.85);
+}
+
+/* --------------------------------------------------------------------------
+   8. Soundwave Equalizer Animation
+   -------------------------------------------------------------------------- */
+@keyframes barDance1 { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+@keyframes barDance2 { 0%, 100% { height: 14px; } 50% { height: 5px; } }
+@keyframes barDance3 { 0%, 100% { height: 8px; } 50% { height: 18px; } }
+@keyframes barDance4 { 0%, 100% { height: 16px; } 50% { height: 6px; } }
+
+.eq-bar:nth-child(1) { animation: barDance1 0.75s ease-in-out infinite; }
+.eq-bar:nth-child(2) { animation: barDance2 0.65s ease-in-out infinite 0.15s; }
+.eq-bar:nth-child(3) { animation: barDance3 0.85s ease-in-out infinite 0.3s; }
+.eq-bar:nth-child(4) { animation: barDance4 0.7s ease-in-out infinite 0.2s; }
+.eq-bar:nth-child(5) { animation: barDance2 0.8s ease-in-out infinite 0.1s; }
+.eq-bar:nth-child(6) { animation: barDance3 0.6s ease-in-out infinite 0.25s; }
+.eq-bar:nth-child(7) { animation: barDance1 0.7s ease-in-out infinite 0.05s; }
+
+/* --------------------------------------------------------------------------
+   9. Pricing Card Styles (Static, Zero Spinning Animation)
+   -------------------------------------------------------------------------- */
+.pricing-card-glow {
+  position: relative;
+  border-radius: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   10. Scroll Reveal Engine
+   -------------------------------------------------------------------------- */
+.reveal-on-scroll {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-scale-on-scroll {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+/* Progressive reveal for off-screen elements when JS engine is active */
+html.js-ready .reveal-on-scroll:not(.revealed):not(.is-revealed):not([data-revealed="true"]) {
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+html.js-ready .reveal-on-scroll.revealed,
+html.js-ready .reveal-on-scroll.is-revealed,
+html.js-ready .reveal-on-scroll[data-revealed="true"],
+.reveal-on-scroll.is-revealed,
+.reveal-on-scroll[data-revealed="true"] {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: auto;
+}
+
+html.js-ready .reveal-scale-on-scroll:not(.revealed):not(.is-revealed):not([data-revealed="true"]) {
+  opacity: 0;
+  transform: scale(0.94) translateY(24px);
+}
+
+html.js-ready .reveal-scale-on-scroll.revealed,
+html.js-ready .reveal-scale-on-scroll.is-revealed,
+html.js-ready .reveal-scale-on-scroll[data-revealed="true"],
+.reveal-scale-on-scroll.is-revealed,
+.reveal-scale-on-scroll[data-revealed="true"] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  will-change: auto;
+}
+
+/* Hero section elements must always remain visible on initial paint */
+#hero .reveal-on-scroll,
+#hero .reveal-scale-on-scroll,
+#showcase {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Transition delay utility classes */
+.delay-50 { transition-delay: 0.05s; }
+.delay-80 { transition-delay: 0.08s; }
+.delay-100 { transition-delay: 0.1s; }
+.delay-120 { transition-delay: 0.12s; }
+.delay-150 { transition-delay: 0.15s; }
+.delay-160 { transition-delay: 0.16s; }
+.delay-190 { transition-delay: 0.19s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-240 { transition-delay: 0.24s; }
+.delay-250 { transition-delay: 0.25s; }
+.delay-260 { transition-delay: 0.26s; }
+.delay-300 { transition-delay: 0.3s; }
+.delay-320 { transition-delay: 0.32s; }
+.delay-330 { transition-delay: 0.33s; }
+.delay-350 { transition-delay: 0.35s; }
+.delay-400 { transition-delay: 0.4s; }
+.delay-450 { transition-delay: 0.45s; }
+
+/* --------------------------------------------------------------------------
+   11. Workflow Connecting Energy Line
+   -------------------------------------------------------------------------- */
+@keyframes energyPulse {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.energy-beam {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff6d29, #ffffff, #ff6d29, transparent);
+  animation: energyPulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* --------------------------------------------------------------------------
+   12. FAQ Accordion & Details
+   -------------------------------------------------------------------------- */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary {
+  user-select: none;
+}
+
+details[open] summary .faq-chevron {
+  transform: rotate(180deg);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* FAQ Accordion Grid Animation */
+.faq-accordion-grid {
+  display: grid;
+  transition: grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease;
+}
+
+.faq-accordion-grid[data-state="open"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.faq-accordion-grid[data-state="closed"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.faq-answer-content {
+  overflow: hidden;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease;
+}
+
+.faq-accordion-grid[data-state="open"] .faq-answer-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.faq-accordion-grid[data-state="closed"] .faq-answer-content {
+  transform: translateY(6px);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-accordion-grid,
+  .faq-answer-content,
+  .faq-icon-btn {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. Live Recording & Status Indicators
+   -------------------------------------------------------------------------- */
+@keyframes recBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.rec-indicator {
+  animation: recBlink 1.4s ease-in-out infinite;
+}
+
+/* Hide scrollbar for clean horizontal card scrolling on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* --------------------------------------------------------------------------
+   15. Crystal Clear Glassmorphism Play Buttons
+   -------------------------------------------------------------------------- */
+.reel-glass-play-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.3),
+    0 0 25px rgba(255, 109, 41, 0.35);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Crystal curved top-half specular highlight sheen */
+.reel-glass-play-btn::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  right: 3px;
+  height: 48%;
+  border-radius: 9999px 9999px 0 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* Bottom specular rim reflection */
+.reel-glass-play-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  right: 15%;
+  height: 1.5px;
+  background: radial-gradient(circle, rgba(255, 109, 41, 0.85) 0%, transparent 80%);
+  pointer-events: none;
+}
+
+/* Group hover and standalone hover states */
+.group:hover .reel-glass-play-btn,
+.reel-glass-play-btn:hover {
+  transform: scale(1.15);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.6),
+    inset 0 2px 3px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    0 0 40px rgba(255, 109, 41, 0.7);
+}
+
+/* Centerpiece Hero Card Crystal Glass Play Button */
+.hero-glass-btn {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(24px) saturate(220%);
+  -webkit-backdrop-filter: blur(24px) saturate(220%);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.6),
+    inset 0 2px 3px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.35),
+    0 0 38px rgba(255, 109, 41, 0.75);
+}
+
+.group:hover .hero-glass-btn,
+.hero-glass-btn:hover {
+  transform: scale(1.18);
+  background: rgba(255, 255, 255, 0.28);
+  border-color: #ffffff;
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.75),
+    inset 0 2.5px 4px #ffffff,
+    0 0 60px rgba(255, 109, 41, 1);
+}
+
+/* Play button icon styling */
+.reel-glass-play-icon {
+  color: #ffffff;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+  transition: transform 0.25s ease, color 0.25s ease;
+  margin-left: 2px;
+}
+
+.group:hover .reel-glass-play-icon {
+  transform: scale(1.08);
+  color: #ffffff;
+}
+
+/* Reduced size play/pause button while playing with sound (Inline playback) */
+.fanned-card.is-playing .hero-glass-btn {
+  width: 40px !important;
+  height: 40px !important;
+  transform: scale(0.72) !important;
+  opacity: 0.82 !important;
+  background: rgba(18, 15, 19, 0.72) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1.5px solid rgba(255, 109, 41, 0.85) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 109, 41, 0.6) !important;
+}
+
+.fanned-card.is-playing .hero-glass-btn:hover {
+  transform: scale(0.88) !important;
+  opacity: 1 !important;
+  background: rgba(255, 109, 41, 0.35) !important;
+  border-color: #ff6d29 !important;
+}
+
+.fanned-card.is-playing .reel-glass-play-icon {
+  font-size: 20px !important;
+  margin-left: 0 !important;
+  color: #ff6d29 !important;
+}
+
+/* Equalizer bar pulse animation when card is playing with audio */
+@keyframes eqBounce {
+  0% { height: 3px; }
+  100% { height: 12px; }
+}
+
+.fanned-card.is-playing .eq-bar:nth-child(1) {
+  animation: eqBounce 0.6s ease-in-out infinite alternate;
+}
+.fanned-card.is-playing .eq-bar:nth-child(2) {
+  animation: eqBounce 0.45s ease-in-out 0.15s infinite alternate;
+}
+.fanned-card.is-playing .eq-bar:nth-child(3) {
+  animation: eqBounce 0.55s ease-in-out 0.3s infinite alternate;
+}
+.fanned-card.is-playing .eq-bar:nth-child(4) {
+  animation: eqBounce 0.4s ease-in-out 0.1s infinite alternate;
+}
+
+/* Custom Seek Progress Range / Scrubber */
+#player-progress-container:hover #player-progress-bar {
+  background-color: #ff6d29;
+  box-shadow: 0 0 10px rgba(255, 109, 41, 0.8);
+}
+
+/* Custom Volume Slider */
+#player-volume-slider {
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  outline: none;
+}
+#player-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+  transition: transform 0.15s ease;
+}
+#player-volume-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+/* Speed Dropdown Active Option */
+.speed-opt.active {
+  background: rgba(255, 109, 41, 0.25);
+  color: #ff6d29;
+  font-weight: 700;
+}
+
+/* Controls deck auto-hide */
+#player-controls-deck {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#player-controls-deck.controls-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+
+/* Center play splash button */
+#player-center-play-btn {
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#player-center-play-btn.splash-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85);
+}
+
+/* Buffering spinner keyframe */
+@keyframes playerSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.player-spinner {
+  animation: playerSpin 0.8s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   17. Accessibility (Reduced Motion Preference)
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   19. Gold-Highlighted Brand X (reelXpress)
+   -------------------------------------------------------------------------- */
+.brand-x-gold {
+  color: #FFD700;
+  background: linear-gradient(135deg, #FFF3A8 0%, #FFD700 35%, #F5A623 70%, #FFE082 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.45));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.group:hover .brand-x-gold,
+a:hover .brand-x-gold {
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.85));
+}
+
+/* --------------------------------------------------------------------------
+   19b. Luxe Editorial Serif Typography
+   -------------------------------------------------------------------------- */
+.font-luxe-serif {
+  font-family: var(--font-cormorant), 'Playfair Display', Georgia, serif;
+}
+
+/* --------------------------------------------------------------------------
+   20. Half Day Plan Badges (Most Popular & Stars)
+   -------------------------------------------------------------------------- */
+.half-day-popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #FF6D29 0%, #FF8533 50%, #FF5500 100%);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 109, 41, 0.75), 0 0 14px rgba(255, 109, 41, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  pointer-events: auto;
+  user-select: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.half-day-popular-badge:hover {
+  transform: translateX(-50%) scale(1.06);
+  box-shadow: 0 6px 28px rgba(255, 109, 41, 0.95), 0 0 20px rgba(255, 109, 41, 0.7);
+}
+
+.half-day-popular-badge .popular-fire-icon {
+  width: 14px;
+  height: 14px;
+  fill: #FFE066;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  flex-shrink: 0;
+}
+
+.half-day-stars-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 215, 0, 0.12);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.25), inset 0 0 8px rgba(255, 215, 0, 0.1);
+  color: #FFD700;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.half-day-stars-badge:hover {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 22px rgba(255, 215, 0, 0.45);
+  transform: scale(1.04);
+}
+
+.half-day-stars-badge svg {
+  width: 14px;
+  height: 14px;
+  fill: #FFD700;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.85));
+}
+
+@media (min-width: 1024px) {
+  html.js-ready .reveal-on-scroll.revealed.lg\:-translate-y-4,
+  html.js-ready .reveal-on-scroll.is-revealed.lg\:-translate-y-4,
+  .reveal-on-scroll.is-revealed.lg\:-translate-y-4 {
+    transform: translateY(-1rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Floating Persistent Quick Action Buttons Overlay
+   Guaranteed viewport-fixed across all sections & pages
+   -------------------------------------------------------------------------- */
+.floating-overlay-container {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 24px !important;
+  z-index: 99990 !important;
+  isolation: isolate !important;
+}
+
+.floating-overlay-container.is-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+.floating-overlay-container.is-visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
+@media (max-width: 640px) {
+  .floating-overlay-container {
+    bottom: 16px !important;
+    left: 16px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Shimmer keyframes for loading states
+   -------------------------------------------------------------------------- */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Infinite Rightward Marquee Animation
+   Continuous smooth motion towards the right
+   -------------------------------------------------------------------------- */
+@keyframes marquee-to-right {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+.animate-marquee-right {
+  animation: marquee-to-right 32s linear infinite;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .marquee-right-container:hover .animate-marquee-right {
+    animation-play-state: paused;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Testimonials Dual-Direction Marquee Animations
+   Row 1: Scrolls LEFT (40s), Row 2: Scrolls RIGHT (50s)
+   -------------------------------------------------------------------------- */
+@keyframes marquee-scroll-left {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes marquee-scroll-right {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+.animate-marquee-left {
+  animation: marquee-scroll-left 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right-slow {
+  animation: marquee-scroll-right 50s linear infinite;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .testimonials-marquee-row:hover .animate-marquee-left,
+  .testimonials-marquee-row:hover .animate-marquee-right-slow {
+    animation-play-state: paused;
+  }
+}
+
+.testimonials-mask-fade {
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+/* --------------------------------------------------------------------------
+   14. Hero Phone Mockup Animations
+   -------------------------------------------------------------------------- */
+@keyframes heroPhoneFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-hero-phone {
+  animation: heroPhoneFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes phoneFloat1 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes phoneFloat2 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.animate-phone-float-1 {
+  animation: phoneFloat1 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-phone-float-2 {
+  animation: phoneFloat2 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes pulseDotRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulseDotRing 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes digitFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pin-digit-seq {
+  animation: digitFadeIn 0.5s ease-out backwards;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced Motion Support
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-widget-root *,
+  .animate-marquee-left,
+  .animate-marquee-right-slow,
+  .animate-marquee-right,
+  .animate-hero-phone,
+  .animate-phone-float-1,
+  .animate-phone-float-2,
+  .animate-pulse-ring,
+  .pin-digit-seq {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   15. Mobile & Touch Optimizations
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Prevent iOS Safari auto-zoom when focusing form fields */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Fast tap response & eliminate 300ms mobile tap delay */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure no horizontal page overflow on small screens */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

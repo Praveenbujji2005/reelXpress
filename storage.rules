@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if request is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper to check image constraints (max 10MB, valid image content-type)
+    function isValidImage() {
+      return request.resource.size < 10 * 1024 * 1024 &&
+             request.resource.contentType.matches('image/.*');
+    }
+
+    // =========================================================================
+    // Public Website Assets & Uploaded CMS Media:
+    // - Public can READ images (view reels, avatars, hero posters)
+    // - Only Authenticated Administrators can UPLOAD or DELETE images
+    // =========================================================================
+    match /uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    match /hero/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    match /testimonials/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+  }
+}
