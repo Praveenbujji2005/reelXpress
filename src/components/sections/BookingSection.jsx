@@ -34,15 +34,54 @@ export default function BookingSection({ onBookingSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitError(null);
     setSubmitSuccess(null);
 
+    // Client-side validations
+    const customerName = formData.name.trim();
+    if (!customerName || customerName.length < 2) {
+      setSubmitError('Please enter your full name.');
+      return;
+    }
+
+    const emailTrimmed = formData.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) {
+      setSubmitError('Please enter a valid email address.');
+      return;
+    }
+
+    const cleanPhone = formData.phone.replace(/\D/g, '').replace(/^91/, '');
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setSubmitError('Please enter a valid 10-digit Indian mobile number (e.g., 9876543210).');
+      return;
+    }
+
+    if (!formData.date) {
+      setSubmitError('Please select a preferred event date.');
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(formData.date);
+    if (selectedDate < today) {
+      setSubmitError('Please select a current or future event date.');
+      return;
+    }
+
+    if (!formData.city.trim()) {
+      setSubmitError('Please enter your shoot location / city zone.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     const payload = {
-      customerName: formData.name.trim(),
-      fullName: formData.name.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
+      customerName,
+      fullName: customerName,
+      email: emailTrimmed,
+      phone: `+91 ${cleanPhone}`,
       companyName: formData.companyName.trim(),
       selectedService: formData.type,
       serviceType: formData.type,
@@ -74,9 +113,9 @@ export default function BookingSection({ onBookingSuccess }) {
         data.message || 'Your shoot slot has been locked! Our coordinator will connect via WhatsApp within minutes.'
       );
       onBookingSuccess?.({
-        name: payload.customerName || 'Creator',
-        date: payload.eventDate || 'Selected Date',
-        city: payload.city || 'Bengaluru',
+        name: payload.customerName,
+        date: payload.eventDate,
+        city: payload.city,
         type: payload.selectedService,
       });
 
@@ -95,7 +134,7 @@ export default function BookingSection({ onBookingSuccess }) {
     } catch (err) {
       console.error('[BookingSection] Submission failed:', err);
       setSubmitError(
-        err.message || 'Unable to store your enquiry in Firestore database. Please verify connection and try again.'
+        err.message || 'Unable to store your enquiry. Please verify your connection and try again.'
       );
     } finally {
       setIsSubmitting(false);
@@ -164,13 +203,13 @@ export default function BookingSection({ onBookingSuccess }) {
           {/* Quick Booking Form */}
           <div id="booking-form" className="rounded-2xl bg-surface-deep/90 border border-border-specular p-6 md:p-8 backdrop-blur-xl shadow-xl spotlight-card">
             <div className="text-title-lg font-bold text-text-primary mb-1">Book Your Reel Shoot</div>
-            <p className="text-body-sm text-text-muted mb-6">Lock your slot in seconds with direct Firestore confirmation.</p>
+            <p className="text-body-sm text-text-muted mb-6">Lock your slot in seconds.</p>
 
             {submitSuccess && (
               <div className="mb-4 p-4 rounded-xl bg-emerald-950/70 border border-emerald-500/50 text-emerald-200 text-sm flex items-start gap-2.5 animate-fadeIn shadow-lg">
                 <span className="material-symbols-outlined text-emerald-400 text-lg shrink-0 mt-0.5">check_circle</span>
                 <div className="flex-1">
-                  <div className="font-bold text-emerald-300">Enquiry Stored in Firestore!</div>
+                  <div className="font-bold text-emerald-300">Slot Reserved!</div>
                   <div className="text-xs text-emerald-200/90 mt-0.5">{submitSuccess}</div>
                 </div>
               </div>
@@ -180,7 +219,7 @@ export default function BookingSection({ onBookingSuccess }) {
               <div className="mb-4 p-4 rounded-xl bg-red-950/70 border border-red-500/50 text-red-200 text-sm flex items-start gap-2.5 animate-fadeIn shadow-lg">
                 <span className="material-symbols-outlined text-red-400 text-lg shrink-0 mt-0.5">error</span>
                 <div className="flex-1">
-                  <div className="font-bold text-red-300">Firestore Write Notice</div>
+                  <div className="font-bold text-red-300">Booking Notice</div>
                   <div className="text-xs text-red-200/90 mt-0.5 leading-relaxed">{submitError}</div>
                 </div>
               </div>
@@ -267,6 +306,7 @@ export default function BookingSection({ onBookingSuccess }) {
                   <input
                     type="date"
                     required
+                    min={new Date().toISOString().split('T')[0]}
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-surface-base border border-border-specular text-text-primary placeholder:text-text-muted/60 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container/40 transition-all text-[16px] sm:text-body-md font-body-md [color-scheme:dark]"
@@ -326,12 +366,12 @@ export default function BookingSection({ onBookingSuccess }) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-shine-sweep btn-ripple w-full mt-2 py-4 rounded-xl bg-primary-container text-text-primary font-bold text-title-md font-title-md shadow-[0_0_25px_rgba(255,109,41,0.5)] hover:shadow-[0_0_40px_rgba(255,109,41,0.85)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+                className="btn-shine-sweep btn-ripple w-full mt-2 py-4 rounded-xl bg-primary-container text-text-primary font-bold text-title-md font-title-md shadow-[0_0_25px_rgba(255,109,41,0.5)] hover:shadow-[0_0_40px_rgba(255,109,41,0.85)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
                     <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Saving to Firestore...</span>
+                    <span>Locking Your Slot...</span>
                   </>
                 ) : (
                   <span>Book Now →</span>

@@ -29,11 +29,28 @@ export default function BookingModal({ isOpen, bookingDetails, onClose }) {
       window.addEventListener('keydown', handleKeyDown);
 
       return () => {
-        document.body.style.overflow = originalOverflow;
+        document.body.style.overflow = originalOverflow || '';
         window.removeEventListener('keydown', handleKeyDown);
       };
     }
   }, [isOpen, onClose]);
+
+  const formattedDate = bookingDetails?.date
+    ? (() => {
+        try {
+          const d = new Date(bookingDetails.date);
+          if (isNaN(d.getTime())) return bookingDetails.date;
+          return d.toLocaleDateString('en-IN', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          });
+        } catch {
+          return bookingDetails.date;
+        }
+      })()
+    : 'Confirmed Upon Call';
 
   return (
     <div
@@ -61,7 +78,7 @@ export default function BookingModal({ isOpen, bookingDetails, onClose }) {
           Slot Successfully Locked!
         </h3>
         <p className="text-body-md text-text-muted mb-6 leading-relaxed">
-          Thank you, <span className="text-primary font-semibold">{bookingDetails?.name || 'Creator'}</span>! Our Bengaluru executive coordinator will WhatsApp your creator portfolio match within minutes.
+          Thank you, <span className="text-primary font-semibold">{bookingDetails?.name || 'there'}</span>! Our Bengaluru executive coordinator will WhatsApp your creator portfolio match within minutes.
         </p>
         <div className="p-4 rounded-xl bg-surface-base border border-border-specular text-left mb-6 space-y-1.5 text-xs text-text-muted">
           <div className="flex justify-between">
@@ -70,11 +87,11 @@ export default function BookingModal({ isOpen, bookingDetails, onClose }) {
           </div>
           <div className="flex justify-between">
             <span className="text-white">Date:</span>{' '}
-            <span className="text-white">{bookingDetails?.date || 'Selected Date'}</span>
+            <span className="text-white font-medium">{formattedDate}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white">City Zone:</span>{' '}
-            <span className="text-white">{bookingDetails?.city || 'Bengaluru'}</span>
+            <span className="text-white font-medium">{bookingDetails?.city || 'Bengaluru'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white">Turnaround:</span>{' '}

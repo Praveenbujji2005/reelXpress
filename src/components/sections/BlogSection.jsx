@@ -1,11 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BLOG_POSTS } from '@/lib/data';
 
 // Blog preview section with in-app reading experience
 export default function BlogSection() {
   const [selectedPost, setSelectedPost] = useState(null);
+
+  useEffect(() => {
+    if (selectedPost) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+          setSelectedPost(null);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = prevOverflow || '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [selectedPost]);
 
   return (
     <section className="py-16 md:py-space-2xl px-6 md:px-margin max-w-[1440px] mx-auto" id="blog">
@@ -63,11 +82,16 @@ export default function BlogSection() {
       {/* In-App Blog Reader Lightbox Modal */}
       {selectedPost && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity"
+          data-lenis-prevent
+          className="fixed inset-0 z-[100030] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md transition-opacity"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="blog-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedPost(null);
+          }}
         >
-          <div className="relative w-full max-w-2xl rounded-3xl bg-surface-base border border-border-amber p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl bg-surface-base border border-border-amber p-6 sm:p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-border-specular pb-4">
               <span className="px-3 py-1 rounded-full bg-surface-container text-primary text-xs font-bold uppercase tracking-wider">
                 {selectedPost.tag}
@@ -76,31 +100,50 @@ export default function BlogSection() {
                 type="button"
                 onClick={() => setSelectedPost(null)}
                 className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high border border-border-specular flex items-center justify-center text-text-muted hover:text-white transition-colors cursor-pointer"
+                aria-label="Close modal"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
 
             <div>
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+              <h3 id="blog-modal-title" className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
                 {selectedPost.title}
               </h3>
               <p className="text-base text-text-muted leading-relaxed mb-6">
-                {selectedPost.description}
+                {selectedPost.summary || selectedPost.description}
               </p>
 
-              <div className="p-4 rounded-xl bg-surface-container/60 border border-border-specular text-sm text-text-primary leading-relaxed space-y-2">
-                <p>
-                  <strong>Key Takeaway:</strong> Modern short-form content drives up to 300% more engagement when delivered within the first 24 hours of an event. With reelXpress, flagship iPhone setups with mobile stabilization and live on-spot editing guarantee social-first viral hooks.
-                </p>
-              </div>
+              {selectedPost.takeaways && selectedPost.takeaways.length > 0 && (
+                <div className="p-5 rounded-2xl bg-surface-container/60 border border-border-specular text-sm text-text-primary leading-relaxed space-y-2.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base">lightbulb</span>
+                    <span>Key Takeaways</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {selectedPost.takeaways.map((takeaway, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-text-muted">
+                        <span className="text-primary font-bold mt-0.5">•</span>
+                        <span>{takeaway}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-specular">
+            <div className="flex items-center justify-between pt-4 border-t border-border-specular">
+              <button
+                type="button"
+                onClick={() => setSelectedPost(null)}
+                className="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-text-muted hover:text-white text-sm font-semibold transition-colors cursor-pointer"
+              >
+                Close
+              </button>
               <a
                 href="#booking"
                 onClick={() => setSelectedPost(null)}
-                className="btn-shine-sweep btn-ripple inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-container text-white font-bold text-sm shadow-[0_0_20px_rgba(255,109,41,0.5)] cursor-pointer"
+                className="btn-shine-sweep btn-ripple inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-container text-white font-bold text-sm shadow-[0_0_20px_rgba(255,109,41,0.5)] cursor-pointer"
               >
                 <span>Book This Format</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
