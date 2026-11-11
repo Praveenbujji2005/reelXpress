@@ -329,7 +329,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {recentInquiries.map((inq) => {
+                  {recentInquiries.map((inq, idx) => {
                     const st = (inq.status || 'New').toLowerCase();
                     const statusBadgeClass =
                       st === 'new'
@@ -342,7 +342,7 @@ export default function AdminDashboardPage() {
                       st === 'completed' || st === 'resolved' ? 'COMPLETED' : st === 'contacted' ? 'CONTACTED' : 'NEW';
 
                     return (
-                      <tr key={inq.id} className="hover:bg-white/[0.02] transition-colors">
+                      <tr key={`recent-inq-${inq.id ?? idx}-${idx}`} className="hover:bg-white/[0.02] transition-colors">
                         <td className="py-3.5 pr-3">
                           <div className="font-bold text-white">{inq.customerName || inq.fullName}</div>
                           <div className="text-xs text-text-muted">{inq.phone}</div>
@@ -422,7 +422,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {recentCreators.map((creator) => {
+                  {recentCreators.map((creator, idx) => {
                     const st = (creator.status || 'New').toLowerCase();
                     const statusBadge =
                       st === 'new'
@@ -434,7 +434,7 @@ export default function AdminDashboardPage() {
                         : 'bg-white/10 text-white/70 border-white/20';
 
                     return (
-                      <tr key={creator.id} className="hover:bg-white/[0.02] transition-colors">
+                      <tr key={`recent-creator-${creator.id ?? idx}-${idx}`} className="hover:bg-white/[0.02] transition-colors">
                         <td className="py-3.5 pr-3">
                           <div className="font-bold text-white">{creator.fullName}</div>
                           <div className="text-xs text-text-muted font-mono">{creator.mobileNumber}</div>

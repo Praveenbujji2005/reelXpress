@@ -264,13 +264,14 @@ export default function PortfolioCarousel({ onShowToast }) {
           if (diff < -Math.floor(totalCards / 2)) diff += totalCards;
           const absDiff = Math.abs(diff);
 
-          const isLoaded = Boolean(loadedImages[reel.id]);
-          const hasFailed = Boolean(failedImages[reel.id]);
+          const reelIdKey = String(reel.id !== undefined && reel.id !== null ? reel.id : index);
+          const isLoaded = Boolean(loadedImages[reelIdKey]);
+          const hasFailed = Boolean(failedImages[reelIdKey]);
           const posterWebp = reel.poster?.replace(/\.jpg$/, '.webp');
 
           return (
             <div
-              key={reel.id}
+              key={`portfolio-reel-${reelIdKey}-${index}`}
               onClick={() => handleCardClick(index)}
               style={cardStyle}
               className={`fanned-card group cursor-pointer overflow-hidden ${
@@ -319,8 +320,8 @@ export default function PortfolioCarousel({ onShowToast }) {
                 {posterWebp && <source srcSet={posterWebp} type="image/webp" />}
                 <img
                   ref={(node) => {
-                    if (node && node.complete && node.naturalWidth > 0 && !loadedImages[reel.id]) {
-                      setLoadedImages((prev) => ({ ...prev, [reel.id]: true }));
+                    if (node && node.complete && node.naturalWidth > 0 && !loadedImages[reelIdKey]) {
+                      setLoadedImages((prev) => ({ ...prev, [reelIdKey]: true }));
                     }
                   }}
                   src={reel.poster}
@@ -330,8 +331,8 @@ export default function PortfolioCarousel({ onShowToast }) {
                   loading={absDiff <= 1 ? 'eager' : 'lazy'}
                   fetchPriority={isCenter ? 'high' : absDiff === 1 ? 'auto' : 'low'}
                   decoding="async"
-                  onLoad={() => setLoadedImages((prev) => ({ ...prev, [reel.id]: true }))}
-                  onError={() => setFailedImages((prev) => ({ ...prev, [reel.id]: true }))}
+                  onLoad={() => setLoadedImages((prev) => ({ ...prev, [reelIdKey]: true }))}
+                  onError={() => setFailedImages((prev) => ({ ...prev, [reelIdKey]: true }))}
                   className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105 z-10 ${
                     isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                   }`}

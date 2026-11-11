@@ -501,9 +501,9 @@ export default function AdminCreatorsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {paginatedCreators.map((creator) => (
+                {paginatedCreators.map((creator, idx) => (
                   <tr
-                    key={creator.id}
+                    key={`creator-${creator.id ?? idx}-${idx}`}
                     className="hover:bg-white/[0.02] transition-colors group"
                   >
                     {/* Creator Name & Initials */}

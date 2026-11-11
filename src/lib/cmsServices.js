@@ -377,7 +377,7 @@ export const INITIAL_FAQS = (FAQ_DATA || []).map((faq, idx) => ({
 
 // Default Hero slides
 export const INITIAL_HERO_SLIDES = (REEL_PORTFOLIO || []).map((reel, idx) => ({
-  id: String(reel.id || idx + 1),
+  id: String(reel.id !== undefined && reel.id !== null ? reel.id : `hero_${idx + 1}`),
   title: reel.title || `Featured Reel ${idx + 1}`,
   creator: reel.creator || 'reelXpress Creator',
   category: reel.category || 'Celebrations',

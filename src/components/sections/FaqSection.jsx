@@ -168,7 +168,7 @@ export default function FaqSection() {
             <div className="flex flex-col gap-3 fade-in-content">
               {displayedFaqs.map((faq, idx) => (
                 <FAQItem
-                  key={faq.id || idx}
+                  key={`faq-${faq.id ?? idx}-${idx}`}
                   index={idx}
                   faq={faq}
                   isOpen={openIndex === idx}

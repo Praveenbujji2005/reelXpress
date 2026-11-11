@@ -175,7 +175,7 @@ export default function AdminFaqsPage() {
         <div className="space-y-3">
           {filteredFaqs.map((faq, idx) => (
             <div
-              key={faq.id}
+              key={`admin-faq-${faq.id ?? idx}-${idx}`}
               className={`rounded-2xl p-5 bg-[#151215] border transition-all ${
                 faq.enabled ? 'border-white/10 hover:border-white/20' : 'border-white/5 opacity-60'
               }`}

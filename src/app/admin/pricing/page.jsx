@@ -205,9 +205,9 @@ export default function AdminPricingPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPlans.map((plan) => (
+          {filteredPlans.map((plan, idx) => (
             <div
-              key={plan.id}
+              key={`admin-plan-${plan.id ?? idx}-${idx}`}
               className={`rounded-3xl bg-[#151215] border p-6 flex flex-col justify-between shadow-xl transition-all ${
                 plan.isPopular
                   ? 'border-[#ff6d29] shadow-[0_0_30px_rgba(255,109,41,0.2)]'

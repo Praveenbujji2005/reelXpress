@@ -167,9 +167,9 @@ export default function AdminTestimonialsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((t) => (
+          {testimonials.map((t, idx) => (
             <div
-              key={t.id}
+              key={`admin-testi-${t.id ?? idx}-${idx}`}
               className={`rounded-3xl bg-[#151215] border p-6 flex flex-col justify-between shadow-xl transition-all ${
                 t.enabled ? 'border-white/10 hover:border-white/20' : 'border-white/5 opacity-60'
               }`}

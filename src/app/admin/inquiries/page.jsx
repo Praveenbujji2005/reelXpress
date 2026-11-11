@@ -407,7 +407,7 @@ export default function AdminInquiriesPage() {
 
                   return (
                     <tr
-                      key={inq.id}
+                      key={`inq-${inq.id ?? idx}-${idx}`}
                       className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
                       onClick={() => setSelectedInquiry(inq)}
                     >

@@ -188,7 +188,7 @@ export default function AdminHeroPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {slides.map((slide, idx) => (
             <div
-              key={slide.id}
+              key={`admin-slide-${slide.id ?? idx}-${idx}`}
               className={`rounded-3xl bg-[#151215] border overflow-hidden shadow-xl flex flex-col transition-all ${
                 slide.enabled
                   ? 'border-white/10 hover:border-[#ff6d29]/50'

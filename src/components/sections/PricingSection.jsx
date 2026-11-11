@@ -233,7 +233,7 @@ function PricingCardSkeleton({ count = 4, colsClass = 'grid-cols-1 sm:grid-cols-
     <div className={`grid ${colsClass} gap-3.5 sm:gap-4.5 mb-14`}>
       {Array.from({ length: count }).map((_, idx) => (
         <div
-          key={idx}
+          key={`pricing-skel-${idx}`}
           className="relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-5 sm:p-6 flex flex-col justify-between border border-white/5 min-h-[530px] ambient-skeleton shadow-lg"
         >
           <div>
@@ -248,7 +248,7 @@ function PricingCardSkeleton({ count = 4, colsClass = 'grid-cols-1 sm:grid-cols-
             <div className="w-20 h-3 rounded bg-white/10 mb-3.5 ambient-pulse" />
             <div className="space-y-2.5 mb-5">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-start gap-2.5">
+                <div key={`pricing-skel-feature-${idx}-${i}`} className="flex items-start gap-2.5">
                   <div className="w-3.5 h-3.5 rounded-full bg-white/10 shrink-0 ambient-pulse" />
                   <div className="h-3 rounded bg-white/5 flex-1 ambient-pulse" />
                 </div>
@@ -487,9 +487,9 @@ export default function PricingSection() {
               aria-labelledby="tab-instant"
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5 mb-14 fade-in-content"
             >
-          {instantPlans.map((pkg) => (
+          {instantPlans.map((pkg, idx) => (
             <div
-              key={pkg.id}
+              key={`instant-plan-${pkg.id || idx}-${idx}`}
               className={`relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-5 sm:p-6 min-h-[530px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 pkg.isPopular
                   ? 'border border-[#ff6d29]/70 shadow-[0_12px_40px_rgba(255,109,41,0.22)]'
@@ -586,9 +586,9 @@ export default function PricingSection() {
           aria-labelledby="tab-business"
           className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-7 max-w-4xl mx-auto mb-14 fade-in-content"
         >
-          {businessPlans.map((pkg) => (
+          {businessPlans.map((pkg, idx) => (
             <div
-              key={pkg.id}
+              key={`business-plan-${pkg.id || idx}-${idx}`}
               className={`relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-6 sm:p-7 min-h-[530px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 pkg.isPopular
                   ? 'border border-[#ff6d29]/70 shadow-[0_12px_40px_rgba(255,109,41,0.22)]'
@@ -685,9 +685,9 @@ export default function PricingSection() {
           aria-labelledby="tab-wedding"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5 mb-14 fade-in-content"
         >
-          {weddingPlans.map((pkg) => (
+          {weddingPlans.map((pkg, idx) => (
             <div
-              key={pkg.id}
+              key={`wedding-plan-${pkg.id || idx}-${idx}`}
               className={`relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-5 sm:p-6 min-h-[530px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 pkg.isPopular
                   ? 'border border-[#ff6d29]/70 shadow-[0_12px_40px_rgba(255,109,41,0.22)]'

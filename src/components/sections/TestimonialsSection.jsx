@@ -26,7 +26,7 @@ function TestimonialCardSkeleton() {
       <div>
         <div className="flex gap-1.5 mb-3">
           {[1, 2, 3, 4, 5].map((s) => (
-            <div key={s} className="w-3.5 h-3.5 rounded-full bg-white/10 ambient-pulse" />
+            <div key={`skel-star-${s}`} className="w-3.5 h-3.5 rounded-full bg-white/10 ambient-pulse" />
           ))}
         </div>
         <div className="w-full h-3.5 rounded bg-white/10 mb-2 ambient-pulse" />
@@ -146,12 +146,12 @@ export default function TestimonialsSection() {
           <div className="space-y-4 sm:space-y-6">
             <div className="flex gap-4 sm:gap-6 overflow-hidden">
               {[1, 2, 3, 4].map((n) => (
-                <TestimonialCardSkeleton key={n} />
+                <TestimonialCardSkeleton key={`skel-row1-${n}`} />
               ))}
             </div>
             <div className="flex gap-4 sm:gap-6 overflow-hidden">
               {[5, 6, 7, 8].map((n) => (
-                <TestimonialCardSkeleton key={n} />
+                <TestimonialCardSkeleton key={`skel-row2-${n}`} />
               ))}
             </div>
           </div>
