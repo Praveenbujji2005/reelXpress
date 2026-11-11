@@ -223,11 +223,14 @@ export default function PortfolioCarousel({ onShowToast }) {
                 }
               }}
             >
-              {/* Single Frame / Photo of the Video - Pure, Clean & Unobstructed */}
+              {/* Single Frame / Photo of the Video - Explicit width/height to prevent layout shift */}
               <img
                 src={reel.poster}
                 alt={reel.title || 'Reel Photo'}
+                width={290}
+                height={516}
                 loading={isCenter ? 'eager' : 'lazy'}
+                decoding="async"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
 
