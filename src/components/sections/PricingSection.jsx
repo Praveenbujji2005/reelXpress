@@ -436,65 +436,32 @@ export default function PricingSection() {
 
         {activeTab === 'instant' && (
           <>
-            <span className="text-[#ff6d29] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] block mb-2">
+            <span className="text-[#ff6d29] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] block mb-2.5">
               INSTANT CONTENT PACKAGES
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
               Minutes to Delivery. <span className="font-serif italic font-normal text-white/70">Zero Hassle.</span>
             </h2>
-            <p className="text-xs sm:text-sm text-[#a8a1a8] mt-2 max-w-xl mx-auto leading-relaxed">
-              On-spot iPhone vertical video shoots and instant editing for individuals, creators, brands, and events.
+            <p className="text-xs sm:text-sm md:text-base text-[#a8a1a8] mt-2.5 max-w-2xl mx-auto leading-relaxed">
+              High-speed vertical video packages shot on flagship iPhone gear with on-spot professional editing. Your finished, color-graded reels are delivered directly to your device via AirDrop or instant cloud link within 15–30 minutes before your shoot concludes.
             </p>
-
-            {/* Instant Packages Info & Guarantees Strip */}
-            <div className="mt-6 mb-2 max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 text-left">
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-base">bolt</span>
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-white">15–30 Min Turnaround</h4>
-                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
-                    Edited &amp; color-graded live on-site before your shoot concludes.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-base">phone_iphone</span>
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-white">Flagship 4K HDR</h4>
-                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
-                    Shot on latest iPhone Pro with DJI gimbals &amp; wireless mics.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-base">share</span>
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-white">Direct AirDrop / Link</h4>
-                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
-                    Instant zero-loss transfer straight to your phone. Ready to post.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-base">music_note</span>
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-white">Trending Audio &amp; Cuts</h4>
-                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
-                    Viral sound selection, fast hooks, and free revisions included.
-                  </p>
-                </div>
-              </div>
+            <div className="mt-3.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-[11px] sm:text-xs text-white/70">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6d29]" />
+                15–30 Min On-Site Turnaround
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6d29]" />
+                Shot on Latest iPhone Pro
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6d29]" />
+                AirDrop &amp; Cloud Delivery
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6d29]" />
+                Free Revisions &amp; Raw Clips
+              </span>
             </div>
           </>
         )}
