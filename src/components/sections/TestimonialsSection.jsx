@@ -22,6 +22,7 @@ import { getTestimonials } from '@/lib/cmsServices';
 export default function TestimonialsSection() {
   const [row1, setRow1] = useState(ROW_1_TESTIMONIALS);
   const [row2, setRow2] = useState(ROW_2_TESTIMONIALS);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     getTestimonials()
@@ -38,9 +39,18 @@ export default function TestimonialsSection() {
       .catch(() => {});
   }, []);
 
-  // Multiply rows so tracks are wide enough for ultra-wide displays (4K+)
-  const topRowList = [...row1, ...row1, ...row1];
-  const bottomRowList = [...row2, ...row2, ...row2];
+  // Pause animations when browser tab is inactive to preserve battery & CPU
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsPaused(document.hidden);
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  // Use minimal duplication (2x per track) to maintain a seamless CSS infinite loop while minimizing DOM node count
+  const topRowList = row1.length <= 3 ? [...row1, ...row1] : row1;
+  const bottomRowList = row2.length <= 3 ? [...row2, ...row2] : row2;
 
   return (
     <section
@@ -79,7 +89,10 @@ export default function TestimonialsSection() {
            ========================================================================= */}
         <div className="testimonials-marquee-row flex overflow-hidden w-full testimonials-mask-fade">
           {/* Primary Track */}
-          <div className="animate-marquee-left flex items-stretch shrink-0 gap-4 sm:gap-6 pr-4 sm:pr-6">
+          <div
+            className="animate-marquee-left flex items-stretch shrink-0 gap-4 sm:gap-6 pr-4 sm:pr-6"
+            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
+          >
             {topRowList.map((item, idx) => (
               <TestimonialCard
                 key={`row1-primary-${item.id}-${idx}`}
@@ -95,6 +108,7 @@ export default function TestimonialsSection() {
           {/* Sibling Duplicate Track for Seamless Zero-Jump Loop */}
           <div
             className="animate-marquee-left flex items-stretch shrink-0 gap-4 sm:gap-6 pr-4 sm:pr-6"
+            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
             aria-hidden="true"
           >
             {topRowList.map((item, idx) => (
@@ -116,7 +130,10 @@ export default function TestimonialsSection() {
            ========================================================================= */}
         <div className="testimonials-marquee-row flex overflow-hidden w-full testimonials-mask-fade">
           {/* Primary Track */}
-          <div className="animate-marquee-right-slow flex items-stretch shrink-0 gap-4 sm:gap-6 pr-4 sm:pr-6">
+          <div
+            className="animate-marquee-right-slow flex items-stretch shrink-0 gap-4 sm:gap-6 pr-4 sm:pr-6"
+            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
+          >
             {bottomRowList.map((item, idx) => (
               <TestimonialCard
                 key={`row2-primary-${item.id}-${idx}`}
@@ -132,6 +149,7 @@ export default function TestimonialsSection() {
           {/* Sibling Duplicate Track for Seamless Zero-Jump Loop */}
           <div
             className="animate-marquee-right-slow flex items-stretch shrink-0 gap-4 sm:gap-6 pr-4 sm:pr-6"
+            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
             aria-hidden="true"
           >
             {bottomRowList.map((item, idx) => (

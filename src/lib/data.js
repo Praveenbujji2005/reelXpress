@@ -43,7 +43,7 @@ export const HERO_VALUE_BADGES = [
   { icon: "military_tech", text: "1000+ Projects Delivered" },
   { icon: "bolt", text: "Delivery in Minutes" },
   { icon: "phone_iphone", text: "Shot on Latest iPhone" },
-  { icon: "currency_rupee", text: "Starting at ₹1,999" },
+  { icon: "currency_rupee", text: "Starting at ₹2,200" },
 ];
 
 // Shoot Category Cards
@@ -133,7 +133,7 @@ export const REEL_PORTFOLIO = [
   {
     id: 5,
     videoSrc: "/assets/Video2.mp4",
-    poster: "/thumbnails/reel-frame-2.jpg",
+    poster: "/thumbnails/reel-frame-6.jpg",
     category: "Events & Red Carpet",
     title: "Event Launch Shoot",
     subtitle: "Captured & Edited in Minutes",
@@ -146,7 +146,7 @@ export const REEL_PORTFOLIO = [
   {
     id: 6,
     videoSrc: "/assets/Video1.mp4",
-    poster: "/thumbnails/reel-frame-1.jpg",
+    poster: "/thumbnails/reel-frame-7.jpg",
     category: "Celebrations",
     title: "Haldi & Wedding Setup",
     subtitle: "Captured & Edited in Minutes",
@@ -381,6 +381,13 @@ export const BLOG_POSTS = [
       "What wedding videography actually costs in India, tier by tier — no guesswork.",
     link: "/#blog",
     tag: "Weddings",
+    summary:
+      "Traditional Indian wedding videography packages typically range from ₹50,000 to ₹3,00,000+ with 4 to 8 week delivery cycles. reelXpress introduces on-spot mobile cinematography starting at ₹4,999 with instant delivery in minutes, allowing couples and guests to post high-energy vertical reels to Instagram while the festivities are actively happening.",
+    takeaways: [
+      "Traditional wedding video edits take 4-12 weeks; reelXpress delivers in minutes on the wedding day itself.",
+      "Mobile 4K ProRes 60fps captures authentic candid guest reactions without intimidating DSLR rigs.",
+      "Instant social reels drive 5x higher guest engagement on Instagram Stories & feed.",
+    ],
   },
   {
     id: 2,
@@ -389,6 +396,13 @@ export const BLOG_POSTS = [
       "How a showroom handover becomes a cinematic, share-ready reel.",
     link: "/#blog",
     tag: "Automotive",
+    summary:
+      "Buying a new vehicle is one of the most memorable lifestyle milestones. Dealerships and proud buyers now book on-demand reel videographers to capture the silk-veil unboxing, key handover, exhaust note rev, and first drive away with cinematic color grading.",
+    takeaways: [
+      "Captures the iconic cloth unveiling, key handover, and first-rev audio with wireless lapel mics.",
+      "Showrooms use customer delivery reels to boost dealership referral bookings by 40%.",
+      "Immediate handover on Google Drive or AirDrop ensures same-day celebration on Instagram.",
+    ],
   },
   {
     id: 3,
@@ -397,6 +411,13 @@ export const BLOG_POSTS = [
       "The trends defining Indian wedding reels this year — and how to capture them.",
     link: "/#blog",
     tag: "Trends",
+    summary:
+      "The 2026 wedding season belongs to fast-paced transitions, POV bridesmaid vlogs, 0.5x ultra-wide baraat dance energy, and viral audio synchronization. Discover the top 10 reel styles couples are demanding across Bengaluru and South India.",
+    takeaways: [
+      "POV & candid backstage reels outperform staged cinematic trailers by 300% on explore feeds.",
+      "Live turnaround allows immediate collaboration with venue lighting and sound setups.",
+      "Trending music sync and seamless snap transitions keep retention rate above 85%.",
+    ],
   },
 ];
 

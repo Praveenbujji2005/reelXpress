@@ -87,8 +87,13 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Legal Disclaimer */}
+        <div className="pt-6 border-t border-border-specular/30 text-xs text-text-muted/70 leading-relaxed text-center sm:text-left">
+          reelXpress is an independent service provider operated by QUANTELLOVENTURES PRIVATE LIMITED and is not affiliated with or endorsed by Instagram, Meta, or any brands shown unless explicitly stated.
+        </div>
+
         {/* Copyright Notice */}
-        <div className="pt-8 border-t border-border-specular/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-body-sm font-body-sm text-text-muted">
+        <div className="pt-4 border-t border-border-specular/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-body-sm font-body-sm text-text-muted">
           <div>
             Copyright © 2026 by QUANTELLOVENTURES PRIVATE LIMITED. All rights reserved.
           </div>

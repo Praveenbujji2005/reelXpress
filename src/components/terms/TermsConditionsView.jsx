@@ -530,15 +530,15 @@ export default function TermsConditionsView() {
                       Contact Number
                     </div>
                     <a
-                      href="tel:+919880161474"
+                      href="tel:+919988338180"
                       className="text-body-sm text-text-primary hover:text-primary transition-colors block font-semibold"
                     >
-                      +91 9880161474
+                      +91 9988338180
                     </a>
                   </div>
                   <button
                     type="button"
-                    onClick={() => copyToClipboard('+91 9880161474', 'Contact phone')}
+                    onClick={() => copyToClipboard('+91 9988338180', 'Contact phone')}
                     className="inline-flex items-center gap-1 text-[11px] text-text-muted hover:text-primary transition-colors cursor-pointer pt-2"
                   >
                     <span className="material-symbols-outlined text-xs">content_copy</span>

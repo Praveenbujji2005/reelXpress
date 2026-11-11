@@ -1,11 +1,17 @@
 'use client';
 
+import { SITE_CONFIG } from '@/config/site';
 import { CLIENT_BRANDS } from '@/lib/data';
 
-// Smooth infinite ticker banner displaying featured client brands moving continuously towards the right
+/**
+ * Featured Client Brands Ticker
+ * Protected by SITE_CONFIG.SHOW_CLIENT_BRANDS.
+ * TODO: Confirm legal trademark rights before enabling SHOW_CLIENT_BRANDS in src/config/site.js.
+ */
 export default function BrandTicker() {
-  // Multiply array to guarantee full coverage and seamless rightward flow
-  const brandList = [...CLIENT_BRANDS, ...CLIENT_BRANDS];
+  if (!SITE_CONFIG.SHOW_CLIENT_BRANDS) {
+    return null;
+  }
 
   return (
     <section
@@ -20,7 +26,7 @@ export default function BrandTicker() {
       <div className="marquee-right-container flex overflow-hidden w-full">
         {/* Primary Track */}
         <div className="animate-marquee-right flex items-center shrink-0">
-          {brandList.map((brand, idx) => (
+          {CLIENT_BRANDS.map((brand, idx) => (
             <div key={idx} className="flex items-center shrink-0 mx-6 sm:mx-10 md:mx-14">
               <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-[0.25em] text-white/35 hover:text-white transition-colors duration-200 cursor-default">
                 {brand}
@@ -32,7 +38,7 @@ export default function BrandTicker() {
 
         {/* Duplicate Sibling Track for Seamless Infinite Rightward Loop */}
         <div className="animate-marquee-right flex items-center shrink-0" aria-hidden="true">
-          {brandList.map((brand, idx) => (
+          {CLIENT_BRANDS.map((brand, idx) => (
             <div key={`dup-${idx}`} className="flex items-center shrink-0 mx-6 sm:mx-10 md:mx-14">
               <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-[0.25em] text-white/35 hover:text-white transition-colors duration-200 cursor-default">
                 {brand}
