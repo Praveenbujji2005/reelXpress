@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { REEL_PORTFOLIO, INSTAGRAM_PAGE_URL } from '@/lib/data';
-import { getHeroSlides } from '@/lib/cmsServices';
+import { getHeroSlides, getCachedHeroSlides } from '@/lib/cmsServices';
 
 // Overlapping fanned-out 3D reel portfolio carousel displaying clean photo stills with Instagram redirection
 export default function PortfolioCarousel({ onShowToast }) {
@@ -23,19 +23,12 @@ export default function PortfolioCarousel({ onShowToast }) {
   // Load dynamic hero slides from CMS / Firestore with instantaneous cache fast-path
   useEffect(() => {
     // 1. Instant cache fast-path to prevent network delay on initial render
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('reelxpress_cms_hero');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const activeSlides = parsed.filter((s) => s.enabled !== false);
-            if (activeSlides.length > 0) {
-              setReels(activeSlides);
-            }
-          }
-        }
-      } catch {}
+    const cached = getCachedHeroSlides();
+    if (cached && cached.length > 0) {
+      const activeSlides = cached.filter((s) => s.enabled !== false);
+      if (activeSlides.length > 0) {
+        setReels(activeSlides);
+      }
     }
 
     // 2. Background revalidation

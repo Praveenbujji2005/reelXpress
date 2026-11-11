@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import TestimonialCard from './TestimonialCard';
 import { ROW_1_TESTIMONIALS, ROW_2_TESTIMONIALS } from '@/lib/data';
-import { getTestimonials } from '@/lib/cmsServices';
+import { getTestimonials, getCachedTestimonials } from '@/lib/cmsServices';
 
 /**
  * TestimonialsSection Component
@@ -51,23 +51,16 @@ export default function TestimonialsSection() {
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    // 1. Instant check from localStorage
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('reelxpress_cms_testimonials');
-        if (raw) {
-          const cached = JSON.parse(raw);
-          if (Array.isArray(cached) && cached.length > 0) {
-            const active = cached.filter((t) => t.enabled !== false);
-            if (active.length > 0) {
-              const mid = Math.ceil(active.length / 2);
-              setRow1(active.slice(0, mid));
-              setRow2(active.slice(mid).length > 0 ? active.slice(mid) : active.slice(0, mid));
-              setIsLoading(false);
-            }
-          }
-        }
-      } catch {}
+    // 1. Instant check from cache for 0ms initial render
+    const cached = getCachedTestimonials();
+    if (cached && cached.length > 0) {
+      const active = cached.filter((t) => t.enabled !== false);
+      if (active.length > 0) {
+        const mid = Math.ceil(active.length / 2);
+        setRow1(active.slice(0, mid));
+        setRow2(active.slice(mid).length > 0 ? active.slice(mid) : active.slice(0, mid));
+        setIsLoading(false);
+      }
     }
 
     // 2. Fetch fresh testimonials in background

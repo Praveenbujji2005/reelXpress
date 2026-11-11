@@ -13,12 +13,26 @@ import {
   saveHeroSlide,
   deleteHeroSlide,
   getActivityLogs,
+  invalidateCmsCache,
 } from '@/lib/cmsServices';
+
+const PUBLIC_CMS_TYPES = ['testimonials', 'reviews', 'pricing', 'faqs', 'hero', 'slides'];
+const ALL_CMS_TYPES = [...PUBLIC_CMS_TYPES, 'activity'];
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || 'testimonials';
+    const type = (searchParams.get('type') || 'testimonials').toLowerCase().trim();
+
+    if (!ALL_CMS_TYPES.includes(type)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Unsupported CMS type "${type}". Supported types: ${ALL_CMS_TYPES.join(', ')}`,
+        },
+        { status: 400 }
+      );
+    }
 
     let data = [];
     switch (type) {
@@ -40,10 +54,25 @@ export async function GET(request) {
         data = await getActivityLogs();
         break;
       default:
-        data = await getTestimonials();
+        data = [];
     }
 
-    return NextResponse.json({ success: true, type, count: data.length, data });
+    // Set cache headers:
+    // Admin activity must NEVER be cached by public CDNs or shared caches
+    // Public CMS items use no-cache, no-store to prevent stale public content upon admin edit
+    const isActivity = type === 'activity';
+    const cacheHeader = isActivity
+      ? 'private, no-cache, no-store, must-revalidate'
+      : 'no-cache, no-store, must-revalidate';
+
+    return NextResponse.json(
+      { success: true, type, count: data.length, data },
+      {
+        headers: {
+          'Cache-Control': cacheHeader,
+        },
+      }
+    );
   } catch (err) {
     console.error('[API /api/cms GET] Error:', err);
     return NextResponse.json(
@@ -65,8 +94,19 @@ export async function POST(request) {
       );
     }
 
+    const normalizedType = type.toLowerCase().trim();
+    if (!PUBLIC_CMS_TYPES.includes(normalizedType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Unsupported CMS type for save: "${type}". Allowed: ${PUBLIC_CMS_TYPES.join(', ')}`,
+        },
+        { status: 400 }
+      );
+    }
+
     let savedItem = null;
-    switch (type) {
+    switch (normalizedType) {
       case 'testimonials':
       case 'reviews':
         savedItem = await saveTestimonial(item, adminEmail);
@@ -82,14 +122,16 @@ export async function POST(request) {
         savedItem = await saveHeroSlide(item, adminEmail);
         break;
       default:
-        throw new Error(`Unsupported CMS type: ${type}`);
+        throw new Error(`Unsupported CMS type: ${normalizedType}`);
     }
+
+    invalidateCmsCache(normalizedType);
 
     return NextResponse.json({
       success: true,
-      type,
+      type: normalizedType,
       item: savedItem,
-      message: `${type} saved successfully.`,
+      message: `${normalizedType} saved successfully.`,
     });
   } catch (err) {
     console.error('[API /api/cms POST] Error:', err);
@@ -103,13 +145,24 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
+    const rawType = searchParams.get('type');
     const id = searchParams.get('id');
     const adminEmail = searchParams.get('adminEmail') || 'admin@reelxpress.com';
 
-    if (!type || !id) {
+    if (!rawType || !id) {
       return NextResponse.json(
         { success: false, error: 'Missing type or id.' },
+        { status: 400 }
+      );
+    }
+
+    const type = rawType.toLowerCase().trim();
+    if (!PUBLIC_CMS_TYPES.includes(type)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Unsupported CMS type for delete: "${rawType}". Allowed: ${PUBLIC_CMS_TYPES.join(', ')}`,
+        },
         { status: 400 }
       );
     }
@@ -132,6 +185,8 @@ export async function DELETE(request) {
       default:
         throw new Error(`Unsupported CMS type: ${type}`);
     }
+
+    invalidateCmsCache(type);
 
     return NextResponse.json({
       success: true,

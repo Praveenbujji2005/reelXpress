@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import FAQItem from './FAQItem';
 import { FAQ_DATA } from '@/lib/data';
-import { getFaqs } from '@/lib/cmsServices';
+import { getFaqs, getCachedFaqs } from '@/lib/cmsServices';
 
 /**
  * FaqSection Component (Redesigned & Database-Connected)
@@ -27,21 +27,14 @@ export default function FaqSection() {
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Instant check from localStorage
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('reelxpress_cms_faqs');
-        if (raw) {
-          const cached = JSON.parse(raw);
-          if (Array.isArray(cached) && cached.length > 0) {
-            const active = cached.filter((f) => f.enabled !== false);
-            if (active.length > 0) {
-              setFaqs(active);
-              setIsLoading(false);
-            }
-          }
-        }
-      } catch {}
+    // 1. Instant check from cache for 0ms initial render
+    const cached = getCachedFaqs();
+    if (cached && cached.length > 0) {
+      const active = cached.filter((f) => f.enabled !== false);
+      if (active.length > 0) {
+        setFaqs(active);
+        setIsLoading(false);
+      }
     }
 
     async function loadFaqs() {

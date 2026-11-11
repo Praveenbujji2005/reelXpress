@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getPricingPlans } from '@/lib/cmsServices';
+import { getPricingPlans, getCachedPricingPlans } from '@/lib/cmsServices';
 
 // Pricing Tabs
 const TABS = [
@@ -271,24 +271,17 @@ export default function PricingSection() {
   const tabRefs = useRef([]);
 
   useEffect(() => {
-    // 1. Instant check from localStorage for zero initial wait
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('reelxpress_cms_pricing');
-        if (raw) {
-          const cached = JSON.parse(raw);
-          if (Array.isArray(cached) && cached.length > 0) {
-            const activePlans = cached.filter((p) => p.enabled !== false);
-            const instant = activePlans.filter((p) => p.category === 'instant');
-            const business = activePlans.filter((p) => p.category === 'business');
-            const wedding = activePlans.filter((p) => p.category === 'wedding');
-            if (instant.length > 0) setInstantPlans(instant);
-            if (business.length > 0) setBusinessPlans(business);
-            if (wedding.length > 0) setWeddingPlans(wedding);
-            setIsLoading(false);
-          }
-        }
-      } catch {}
+    // 1. Instant check from cache for 0ms initial render
+    const cached = getCachedPricingPlans();
+    if (cached && cached.length > 0) {
+      const activePlans = cached.filter((p) => p.enabled !== false);
+      const instant = activePlans.filter((p) => p.category === 'instant');
+      const business = activePlans.filter((p) => p.category === 'business');
+      const wedding = activePlans.filter((p) => p.category === 'wedding');
+      if (instant.length > 0) setInstantPlans(instant);
+      if (business.length > 0) setBusinessPlans(business);
+      if (wedding.length > 0) setWeddingPlans(wedding);
+      setIsLoading(false);
     }
 
     // 2. Fetch fresh CMS pricing plans with background sync

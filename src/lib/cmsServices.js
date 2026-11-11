@@ -13,17 +13,24 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   REEL_PORTFOLIO,
   FAQ_DATA,
-  MARQUEE_TESTIMONIALS,
 } from './data';
 
 // =============================================================================
 // LOCAL PERSISTENCE KEYS
 // =============================================================================
-const KEY_HERO = 'reelxpress_cms_hero_slides';
-const KEY_PRICING = 'reelxpress_cms_pricing_plans';
-const KEY_FAQS = 'reelxpress_cms_faqs';
-const KEY_TESTIMONIALS = 'reelxpress_cms_testimonials';
-const KEY_ACTIVITY = 'reelxpress_cms_activity_logs';
+export const CMS_STORAGE_KEYS = {
+  hero: 'reelxpress_cms_hero',
+  pricing: 'reelxpress_cms_pricing',
+  testimonials: 'reelxpress_cms_testimonials',
+  faqs: 'reelxpress_cms_faqs',
+  activity: 'reelxpress_cms_activity_logs',
+};
+
+// Legacy keys for seamless backward compatibility
+const LEGACY_STORAGE_KEYS = {
+  hero: 'reelxpress_cms_hero_slides',
+  pricing: 'reelxpress_cms_pricing_plans',
+};
 
 // =============================================================================
 // 1. BASELINE CATALOG SEED DATA
@@ -385,12 +392,26 @@ export const INITIAL_HERO_SLIDES = (REEL_PORTFOLIO || []).map((reel, idx) => ({
 // 2. HELPER FUNCTIONS: TIMEOUT & CACHE & MERGE
 // =============================================================================
 
+/**
+ * Server-safe browser localStorage reader
+ */
 function getLocal(key, defaultVal) {
   if (typeof window === 'undefined') return defaultVal;
   try {
-    const raw = localStorage.getItem(key);
+    let raw = localStorage.getItem(key);
+    // Legacy fallback check if modern key not found
     if (!raw) {
-      localStorage.setItem(key, JSON.stringify(defaultVal));
+      for (const [canonical, legacy] of Object.entries(LEGACY_STORAGE_KEYS)) {
+        if (CMS_STORAGE_KEYS[canonical] === key) {
+          raw = localStorage.getItem(legacy);
+          break;
+        }
+      }
+    }
+    if (!raw) {
+      if (defaultVal !== null && defaultVal !== undefined) {
+        localStorage.setItem(key, JSON.stringify(defaultVal));
+      }
       return defaultVal;
     }
     return JSON.parse(raw);
@@ -399,11 +420,61 @@ function getLocal(key, defaultVal) {
   }
 }
 
+/**
+ * Server-safe browser localStorage writer (updates both canonical & legacy keys)
+ */
 function setLocal(key, val) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(key, JSON.stringify(val));
+    const serialized = JSON.stringify(val);
+    localStorage.setItem(key, serialized);
+    for (const [canonical, legacy] of Object.entries(LEGACY_STORAGE_KEYS)) {
+      if (CMS_STORAGE_KEYS[canonical] === key) {
+        localStorage.setItem(legacy, serialized);
+        break;
+      }
+    }
   } catch {}
+}
+
+// =============================================================================
+// SYNCHRONOUS CACHED GETTERS (Instant 0ms bootstrap for public components)
+// =============================================================================
+
+export function getCachedHeroSlides() {
+  const cached = getLocal(CMS_STORAGE_KEYS.hero, null);
+  if (Array.isArray(cached) && cached.length > 0) {
+    const active = cached.filter((s) => s.enabled !== false);
+    if (active.length > 0) return active;
+  }
+  return INITIAL_HERO_SLIDES;
+}
+
+export function getCachedPricingPlans() {
+  const cached = getLocal(CMS_STORAGE_KEYS.pricing, null);
+  if (Array.isArray(cached) && cached.length > 0) {
+    const active = cached.filter((p) => p.enabled !== false);
+    if (active.length > 0) return active;
+  }
+  return INITIAL_PRICING_PLANS;
+}
+
+export function getCachedTestimonials() {
+  const cached = getLocal(CMS_STORAGE_KEYS.testimonials, null);
+  if (Array.isArray(cached) && cached.length > 0) {
+    const active = cached.filter((t) => t.enabled !== false);
+    if (active.length > 0) return active;
+  }
+  return INITIAL_TESTIMONIALS;
+}
+
+export function getCachedFaqs() {
+  const cached = getLocal(CMS_STORAGE_KEYS.faqs, null);
+  if (Array.isArray(cached) && cached.length > 0) {
+    const active = cached.filter((f) => f.enabled !== false);
+    if (active.length > 0) return active;
+  }
+  return INITIAL_FAQS;
 }
 
 // =============================================================================
@@ -414,6 +485,7 @@ const inFlightQueries = new Map();
 const memoryCache = new Map();
 const MEMORY_CACHE_TTL = 3 * 60 * 1000; // 3 minutes fresh in-memory
 const failureCooldown = new Map(); // 15-second cooldown per query key if failed
+const COOLDOWN_MS = 15000;
 
 export function invalidateCmsCache(type) {
   if (type) {
@@ -439,28 +511,67 @@ export function invalidateCmsCache(type) {
   }
 }
 
-function withTimeout(promise, ms = 3500, label = 'CMS Operation') {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
-    ),
-  ]);
+/**
+ * Classify errors for accurate diagnosis & appropriate recovery
+ */
+function classifyError(err) {
+  if (!err) return { type: 'unknown', isTimeout: false, isOffline: false, message: 'Unknown error' };
+  const msg = (err.message || String(err)).toLowerCase();
+  const code = (err.code || '').toLowerCase();
+  const isTimeout = msg.includes('timeout') || msg.includes('timed out');
+  const isOffline =
+    code === 'unavailable' ||
+    code === 'failed-precondition' ||
+    msg.includes('offline') ||
+    msg.includes('network') ||
+    msg.includes('failed to fetch');
+  const isPermission = code === 'permission-denied' || msg.includes('permission');
+  return {
+    type: isTimeout ? 'timeout' : isOffline ? 'offline' : isPermission ? 'permission' : 'error',
+    isTimeout,
+    isOffline,
+    isPermission,
+    message: err.message || String(err),
+  };
 }
 
 /**
- * Resilient, Deduplicated Query Engine:
- * 1. Checks memory cache for fresh data (< 3 min) -> 0ms return.
- * 2. Deduplicates concurrent identical queries via shared in-flight Promise.
- * 3. Prevents hammering on failed network conditions via 15s cooldown.
- * 4. Queries Firestore Web SDK with sensible 3500ms timeout for initial TLS/WebChannel handshake.
- * 5. Falls back to internal fast /api/cms endpoint if running on client and SDK connection is slow.
- * 6. Returns null quietly on complete offline status without breaking UI or spamming console.
+ * Updates localStorage when a query (or delayed background query) succeeds
+ */
+function updateLocalStorageFromCollection(colName, docs) {
+  if (typeof window === 'undefined' || !Array.isArray(docs)) return;
+  const colToKeyMap = {
+    cms_hero: CMS_STORAGE_KEYS.hero,
+    cms_pricing: CMS_STORAGE_KEYS.pricing,
+    cms_testimonials: CMS_STORAGE_KEYS.testimonials,
+    cms_faqs: CMS_STORAGE_KEYS.faqs,
+  };
+  const key = colToKeyMap[colName];
+  if (!key) return;
+
+  let merged = docs;
+  if (colName === 'cms_hero') merged = mergeCloudWithDefaults(INITIAL_HERO_SLIDES, docs, { type: 'hero' });
+  else if (colName === 'cms_pricing') merged = mergeCloudWithDefaults(INITIAL_PRICING_PLANS, docs, { type: 'pricing' });
+  else if (colName === 'cms_testimonials') merged = mergeCloudWithDefaults(INITIAL_TESTIMONIALS, docs, { type: 'testimonials' });
+  else if (colName === 'cms_faqs') merged = mergeCloudWithDefaults(INITIAL_FAQS, docs, { type: 'faqs' });
+
+  setLocal(key, merged);
+}
+
+/**
+ * Robust safeQueryDocs Engine:
+ * 1. Configurable request timeout (options.timeoutMs, default 3000ms).
+ * 2. Per-collection in-flight request deduplication via shared Promise.
+ * 3. Prevents overlapping fallback requests.
+ * 4. Distinct classification of timeouts, offline errors, and empty collections.
+ * 5. Does NOT treat timeout as an empty collection (returns null so cache/defaults are kept).
+ * 6. Updates memory cache and localStorage when a delayed Firestore request eventually succeeds.
  */
 async function safeQueryDocs(colName, sortField, sortDir = 'asc', options = {}) {
+  const timeoutMs = options.timeoutMs || 3000;
   const queryKey = `${colName}_${sortField || 'none'}_${sortDir}`;
 
-  // 1. In-memory cache check (instant)
+  // 1. In-memory cache check (instant 0ms)
   if (!options.forceRefresh && memoryCache.has(queryKey)) {
     const cached = memoryCache.get(queryKey);
     if (Date.now() - cached.timestamp < MEMORY_CACHE_TTL) {
@@ -468,7 +579,7 @@ async function safeQueryDocs(colName, sortField, sortDir = 'asc', options = {}) 
     }
   }
 
-  // 2. In-flight request deduplication
+  // 2. Per-collection in-flight request deduplication
   if (inFlightQueries.has(queryKey)) {
     return inFlightQueries.get(queryKey);
   }
@@ -476,13 +587,16 @@ async function safeQueryDocs(colName, sortField, sortDir = 'asc', options = {}) 
   // 3. Failure cooldown check (prevents spammed timeouts when offline)
   if (!options.forceRefresh && failureCooldown.has(queryKey)) {
     const failedAt = failureCooldown.get(queryKey);
-    if (Date.now() - failedAt < 15000) {
+    if (Date.now() - failedAt < COOLDOWN_MS) {
       return null;
     }
   }
 
   const queryPromise = (async () => {
-    // Attempt 1: Direct Firestore client query
+    let primaryResolved = false;
+    let directFirestorePromise = null;
+
+    // ATTEMPT 1: Direct Firestore client query
     if (isFirebaseConfigured && db) {
       try {
         let q;
@@ -494,21 +608,63 @@ async function safeQueryDocs(colName, sortField, sortDir = 'asc', options = {}) 
           q = collection(db, colName);
         }
 
-        const snap = await withTimeout(getDocs(q), 3500, `Fetch ${colName}`);
+        directFirestorePromise = getDocs(q);
+
+        // Delayed background resolution handler:
+        // If Firestore takes longer than timeoutMs but eventually succeeds,
+        // it updates memoryCache and localStorage, and notifies listeners.
+        directFirestorePromise
+          .then((snap) => {
+            if (snap) {
+              const docs = snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+              memoryCache.set(queryKey, { data: docs, timestamp: Date.now() });
+              failureCooldown.delete(queryKey);
+              updateLocalStorageFromCollection(colName, docs);
+
+              // If this finished after the timeout had already triggered fallback, notify UI
+              if (!primaryResolved && typeof window !== 'undefined') {
+                window.dispatchEvent(
+                  new CustomEvent('cms-cache-invalidated', {
+                    detail: { type: colName.replace('cms_', ''), source: 'delayed-firestore-success' },
+                  })
+                );
+              }
+            }
+          })
+          .catch((err) => {
+            const classified = classifyError(err);
+            if (process.env.NODE_ENV !== 'production' && !classified.isTimeout) {
+              console.debug(`[safeQueryDocs] Background Firestore notice for ${colName}:`, classified.message);
+            }
+          });
+
+        // Race against configurable timeout
+        const snap = await Promise.race([
+          directFirestorePromise,
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`Firestore query for ${colName} timed out after ${timeoutMs}ms`)), timeoutMs)
+          ),
+        ]);
+
+        primaryResolved = true;
         if (snap) {
           const docs = snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));
           memoryCache.set(queryKey, { data: docs, timestamp: Date.now() });
-          return docs;
+          failureCooldown.delete(queryKey);
+          updateLocalStorageFromCollection(colName, docs);
+          return docs; // Legitimate empty [] or populated docs
         }
       } catch (err) {
-        // Quiet debug notice; do not spam production console with red warnings
+        primaryResolved = false;
+        const classified = classifyError(err);
         if (process.env.NODE_ENV !== 'production') {
-          console.debug(`[safeQueryDocs] ${colName} SDK read notice: ${err?.message || err}. Attempting fallback.`);
+          console.debug(`[safeQueryDocs] ${colName} SDK read notice: ${classified.message}. Attempting non-overlapping fallback.`);
         }
       }
     }
 
-    // Attempt 2: Client-side fallback to internal /api/cms endpoint (runs in Node.js server with fast direct connection)
+    // ATTEMPT 2: Client-side sequential fallback to internal /api/cms endpoint (Node.js direct connection)
+    // Runs ONLY if Attempt 1 did not already resolve
     if (typeof window !== 'undefined') {
       try {
         const typeMap = {
@@ -520,20 +676,34 @@ async function safeQueryDocs(colName, sortField, sortDir = 'asc', options = {}) 
         };
         const apiType = typeMap[colName];
         if (apiType) {
-          const res = await withTimeout(fetch(`/api/cms?type=${apiType}`), 2500, `API ${colName}`);
+          const apiTimeoutMs = Math.min(timeoutMs, 2500);
+          const res = await Promise.race([
+            fetch(`/api/cms?type=${apiType}`),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`API ${apiType} timed out after ${apiTimeoutMs}ms`)), apiTimeoutMs)
+            ),
+          ]);
+
           if (res && res.ok) {
             const json = await res.json();
             if (json.success && Array.isArray(json.data)) {
               memoryCache.set(queryKey, { data: json.data, timestamp: Date.now() });
+              failureCooldown.delete(queryKey);
+              updateLocalStorageFromCollection(colName, json.data);
               return json.data;
             }
           }
         }
-      } catch {}
+      } catch (fallbackErr) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.debug(`[safeQueryDocs] API fallback notice for ${colName}:`, fallbackErr?.message || fallbackErr);
+        }
+      }
     }
 
-    // Mark failure cooldown so repeated component renders don't loop network requests
+    // Cooldown on failure
     failureCooldown.set(queryKey, Date.now());
+    // Return null (NOT empty array []) so caller treats this as network failure, NOT as "no items in DB"
     return null;
   })().finally(() => {
     inFlightQueries.delete(queryKey);
@@ -641,8 +811,8 @@ export async function logAdminActivity(action, details, adminEmail = 'admin@reel
     } catch {}
   }
 
-  const logs = getLocal(KEY_ACTIVITY, []);
-  setLocal(KEY_ACTIVITY, [entry, ...logs].slice(0, 50));
+  const logs = getLocal(CMS_STORAGE_KEYS.activity, []);
+  setLocal(CMS_STORAGE_KEYS.activity, [entry, ...logs].slice(0, 50));
   return entry;
 }
 
@@ -652,7 +822,7 @@ export async function getActivityLogs() {
     cloud.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
     return cloud;
   }
-  return getLocal(KEY_ACTIVITY, [
+  return getLocal(CMS_STORAGE_KEYS.activity, [
     {
       id: 'act_init',
       action: 'System Initialized',
@@ -668,14 +838,23 @@ export async function getActivityLogs() {
 // =============================================================================
 
 export async function getTestimonials(options = {}) {
-  const cached = !options.forceRefresh ? getLocal(KEY_TESTIMONIALS, null) : null;
+  // Instant check from memory cache if fresh
+  const memoryKey = 'cms_testimonials_order_asc';
+  if (!options.forceRefresh && memoryCache.has(memoryKey)) {
+    const mem = memoryCache.get(memoryKey);
+    if (Date.now() - mem.timestamp < MEMORY_CACHE_TTL) {
+      return mergeCloudWithDefaults(INITIAL_TESTIMONIALS, mem.data, { type: 'testimonials' });
+    }
+  }
+
+  const cached = !options.forceRefresh ? getCachedTestimonials() : null;
   try {
     const cloud = await safeQueryDocs('cms_testimonials', 'order', 'asc', options);
     if (cloud) {
       const merged = mergeCloudWithDefaults(INITIAL_TESTIMONIALS, cloud, {
         type: 'testimonials',
       });
-      setLocal(KEY_TESTIMONIALS, merged);
+      setLocal(CMS_STORAGE_KEYS.testimonials, merged);
       return merged;
     }
   } catch {}
@@ -700,33 +879,40 @@ export async function saveTestimonial(testimonial, adminEmail) {
     updatedBy: adminEmail || 'admin@reelxpress.com',
   };
 
-  // Direct Firestore persistence
+  // Single Defined Persistence Strategy:
+  // 1. Direct Firestore write
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(doc(db, 'cms_testimonials', tId), payload, { merge: true });
+      persisted = true;
     } catch (err) {
-      console.warn('[saveTestimonial] Direct Firestore write notice:', err);
+      console.warn('[saveTestimonial] Direct Firestore write notice:', err?.message || err);
     }
   }
 
-  // Double sync via server API to guarantee persistence
-  if (typeof window !== 'undefined') {
+  // 2. Server API fallback ONLY if client direct write failed or is not configured
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch('/api/cms', {
+      const res = await fetch('/api/cms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'testimonials', item: payload, adminEmail }),
-      }).catch(() => {});
-    } catch {}
+      });
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[saveTestimonial] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('testimonials');
-
-  const list = await getTestimonials();
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedTestimonials();
   const updated = isNew
-    ? [...list, payload]
-    : list.map((item) => (item.id === tId ? payload : item));
-  setLocal(KEY_TESTIMONIALS, updated);
+    ? [...currentList, payload]
+    : currentList.map((item) => (item.id === tId ? payload : item));
+  setLocal(CMS_STORAGE_KEYS.testimonials, updated);
+
+  invalidateCmsCache('testimonials');
 
   await logAdminActivity(
     isNew ? 'Added Testimonial' : 'Updated Testimonial',
@@ -738,34 +924,46 @@ export async function saveTestimonial(testimonial, adminEmail) {
 }
 
 export async function deleteTestimonial(testimonialId, adminEmail) {
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
-      // Mark as deleted in Firestore so default seed does not resurrect it
+      // Soft-delete so default seed item does not resurrect
       await setDoc(
         doc(db, 'cms_testimonials', testimonialId),
         { id: testimonialId, _deleted: true, updatedAt: new Date().toISOString() },
         { merge: true }
       );
+      persisted = true;
     } catch {
       try {
         await deleteDoc(doc(db, 'cms_testimonials', testimonialId));
-      } catch {}
+        persisted = true;
+      } catch (err) {
+        console.warn('[deleteTestimonial] Direct Firestore delete notice:', err?.message || err);
+      }
     }
   }
 
-  if (typeof window !== 'undefined') {
+  // Fallback to server API only if client direct write failed
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch(`/api/cms?type=testimonials&id=${testimonialId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
+      const res = await fetch(
+        `/api/cms?type=testimonials&id=${encodeURIComponent(testimonialId)}&adminEmail=${encodeURIComponent(adminEmail || '')}`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[deleteTestimonial] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('testimonials');
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedTestimonials();
+  const updated = currentList.filter((t) => t.id !== testimonialId);
+  setLocal(CMS_STORAGE_KEYS.testimonials, updated);
 
-  const list = await getTestimonials();
-  const updated = list.filter((t) => t.id !== testimonialId);
-  setLocal(KEY_TESTIMONIALS, updated);
+  invalidateCmsCache('testimonials');
 
   await logAdminActivity('Deleted Testimonial', `Testimonial ID: ${testimonialId}`, adminEmail);
   return { success: true, id: testimonialId };
@@ -776,14 +974,23 @@ export async function deleteTestimonial(testimonialId, adminEmail) {
 // =============================================================================
 
 export async function getPricingPlans(options = {}) {
-  const cached = !options.forceRefresh ? getLocal(KEY_PRICING, null) : null;
+  // Instant check from memory cache if fresh
+  const memoryKey = 'cms_pricing_order_asc';
+  if (!options.forceRefresh && memoryCache.has(memoryKey)) {
+    const mem = memoryCache.get(memoryKey);
+    if (Date.now() - mem.timestamp < MEMORY_CACHE_TTL) {
+      return mergeCloudWithDefaults(INITIAL_PRICING_PLANS, mem.data, { type: 'pricing' });
+    }
+  }
+
+  const cached = !options.forceRefresh ? getCachedPricingPlans() : null;
   try {
     const cloud = await safeQueryDocs('cms_pricing', 'order', 'asc', options);
     if (cloud) {
       const merged = mergeCloudWithDefaults(INITIAL_PRICING_PLANS, cloud, {
         type: 'pricing',
       });
-      setLocal(KEY_PRICING, merged);
+      setLocal(CMS_STORAGE_KEYS.pricing, merged);
       return merged;
     }
   } catch {}
@@ -802,31 +1009,39 @@ export async function savePricingPlan(plan, adminEmail) {
     updatedBy: adminEmail || 'admin@reelxpress.com',
   };
 
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(doc(db, 'cms_pricing', planId), payload, { merge: true });
+      persisted = true;
     } catch (err) {
-      console.warn('[savePricingPlan] Direct Firestore write notice:', err);
+      console.warn('[savePricingPlan] Direct Firestore write notice:', err?.message || err);
     }
   }
 
-  if (typeof window !== 'undefined') {
+  // Fallback to server API only if direct client write failed
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch('/api/cms', {
+      const res = await fetch('/api/cms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'pricing', item: payload, adminEmail }),
-      }).catch(() => {});
-    } catch {}
+      });
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[savePricingPlan] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('pricing');
-
-  const plans = await getPricingPlans();
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedPricingPlans();
   const updated = isNew
-    ? [...plans, payload]
-    : plans.map((p) => (p.id === planId ? payload : p));
-  setLocal(KEY_PRICING, updated);
+    ? [...currentList, payload]
+    : currentList.map((p) => (p.id === planId ? payload : p));
+  setLocal(CMS_STORAGE_KEYS.pricing, updated);
+
+  invalidateCmsCache('pricing');
 
   await logAdminActivity(
     isNew ? 'Added Pricing Plan' : 'Updated Pricing Plan',
@@ -837,6 +1052,8 @@ export async function savePricingPlan(plan, adminEmail) {
 }
 
 export async function deletePricingPlan(planId, adminEmail) {
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(
@@ -844,26 +1061,35 @@ export async function deletePricingPlan(planId, adminEmail) {
         { id: planId, _deleted: true, updatedAt: new Date().toISOString() },
         { merge: true }
       );
+      persisted = true;
     } catch {
       try {
         await deleteDoc(doc(db, 'cms_pricing', planId));
-      } catch {}
+        persisted = true;
+      } catch (err) {
+        console.warn('[deletePricingPlan] Direct Firestore delete notice:', err?.message || err);
+      }
     }
   }
 
-  if (typeof window !== 'undefined') {
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch(`/api/cms?type=pricing&id=${planId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
+      const res = await fetch(
+        `/api/cms?type=pricing&id=${encodeURIComponent(planId)}&adminEmail=${encodeURIComponent(adminEmail || '')}`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[deletePricingPlan] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('pricing');
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedPricingPlans();
+  const updated = currentList.filter((p) => p.id !== planId);
+  setLocal(CMS_STORAGE_KEYS.pricing, updated);
 
-  const plans = await getPricingPlans();
-  const updated = plans.filter((p) => p.id !== planId);
-  setLocal(KEY_PRICING, updated);
+  invalidateCmsCache('pricing');
 
   await logAdminActivity('Deleted Pricing Plan', `Plan ID: ${planId}`, adminEmail);
   return { success: true, id: planId };
@@ -874,14 +1100,23 @@ export async function deletePricingPlan(planId, adminEmail) {
 // =============================================================================
 
 export async function getFaqs(options = {}) {
-  const cached = !options.forceRefresh ? getLocal(KEY_FAQS, null) : null;
+  // Instant check from memory cache if fresh
+  const memoryKey = 'cms_faqs_order_asc';
+  if (!options.forceRefresh && memoryCache.has(memoryKey)) {
+    const mem = memoryCache.get(memoryKey);
+    if (Date.now() - mem.timestamp < MEMORY_CACHE_TTL) {
+      return mergeCloudWithDefaults(INITIAL_FAQS, mem.data, { type: 'faqs' });
+    }
+  }
+
+  const cached = !options.forceRefresh ? getCachedFaqs() : null;
   try {
     const cloud = await safeQueryDocs('cms_faqs', 'order', 'asc', options);
     if (cloud) {
       const merged = mergeCloudWithDefaults(INITIAL_FAQS, cloud, {
         type: 'faqs',
       });
-      setLocal(KEY_FAQS, merged);
+      setLocal(CMS_STORAGE_KEYS.faqs, merged);
       return merged;
     }
   } catch {}
@@ -908,31 +1143,38 @@ export async function saveFaq(faq, adminEmail) {
     updatedBy: adminEmail || 'admin@reelxpress.com',
   };
 
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(doc(db, 'cms_faqs', faqId), payload, { merge: true });
+      persisted = true;
     } catch (err) {
-      console.warn('[saveFaq] Direct Firestore write notice:', err);
+      console.warn('[saveFaq] Direct Firestore write notice:', err?.message || err);
     }
   }
 
-  if (typeof window !== 'undefined') {
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch('/api/cms', {
+      const res = await fetch('/api/cms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'faqs', item: payload, adminEmail }),
-      }).catch(() => {});
-    } catch {}
+      });
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[saveFaq] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('faqs');
-
-  const list = await getFaqs();
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedFaqs();
   const updated = isNew
-    ? [...list, payload]
-    : list.map((item) => (item.id === faqId ? payload : item));
-  setLocal(KEY_FAQS, updated);
+    ? [...currentList, payload]
+    : currentList.map((item) => (item.id === faqId ? payload : item));
+  setLocal(CMS_STORAGE_KEYS.faqs, updated);
+
+  invalidateCmsCache('faqs');
 
   await logAdminActivity(
     isNew ? 'Added FAQ' : 'Updated FAQ',
@@ -943,6 +1185,8 @@ export async function saveFaq(faq, adminEmail) {
 }
 
 export async function deleteFaq(faqId, adminEmail) {
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(
@@ -950,26 +1194,35 @@ export async function deleteFaq(faqId, adminEmail) {
         { id: faqId, _deleted: true, updatedAt: new Date().toISOString() },
         { merge: true }
       );
+      persisted = true;
     } catch {
       try {
         await deleteDoc(doc(db, 'cms_faqs', faqId));
-      } catch {}
+        persisted = true;
+      } catch (err) {
+        console.warn('[deleteFaq] Direct Firestore delete notice:', err?.message || err);
+      }
     }
   }
 
-  if (typeof window !== 'undefined') {
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch(`/api/cms?type=faqs&id=${faqId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
+      const res = await fetch(
+        `/api/cms?type=faqs&id=${encodeURIComponent(faqId)}&adminEmail=${encodeURIComponent(adminEmail || '')}`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[deleteFaq] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('faqs');
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedFaqs();
+  const updated = currentList.filter((f) => f.id !== faqId);
+  setLocal(CMS_STORAGE_KEYS.faqs, updated);
 
-  const list = await getFaqs();
-  const updated = list.filter((f) => f.id !== faqId);
-  setLocal(KEY_FAQS, updated);
+  invalidateCmsCache('faqs');
 
   await logAdminActivity('Deleted FAQ', `FAQ ID: ${faqId}`, adminEmail);
   return { success: true, id: faqId };
@@ -980,14 +1233,23 @@ export async function deleteFaq(faqId, adminEmail) {
 // =============================================================================
 
 export async function getHeroSlides(options = {}) {
-  const cached = !options.forceRefresh ? getLocal(KEY_HERO, null) : null;
+  // Instant check from memory cache if fresh
+  const memoryKey = 'cms_hero_order_asc';
+  if (!options.forceRefresh && memoryCache.has(memoryKey)) {
+    const mem = memoryCache.get(memoryKey);
+    if (Date.now() - mem.timestamp < MEMORY_CACHE_TTL) {
+      return mergeCloudWithDefaults(INITIAL_HERO_SLIDES, mem.data, { type: 'hero' });
+    }
+  }
+
+  const cached = !options.forceRefresh ? getCachedHeroSlides() : null;
   try {
     const cloud = await safeQueryDocs('cms_hero', 'order', 'asc', options);
     if (cloud) {
       const merged = mergeCloudWithDefaults(INITIAL_HERO_SLIDES, cloud, {
         type: 'hero',
       });
-      setLocal(KEY_HERO, merged);
+      setLocal(CMS_STORAGE_KEYS.hero, merged);
       return merged;
     }
   } catch {}
@@ -1006,31 +1268,38 @@ export async function saveHeroSlide(slide, adminEmail) {
     updatedBy: adminEmail || 'admin@reelxpress.com',
   };
 
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(doc(db, 'cms_hero', slideId), payload, { merge: true });
+      persisted = true;
     } catch (err) {
-      console.warn('[saveHeroSlide] Direct Firestore write notice:', err);
+      console.warn('[saveHeroSlide] Direct Firestore write notice:', err?.message || err);
     }
   }
 
-  if (typeof window !== 'undefined') {
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch('/api/cms', {
+      const res = await fetch('/api/cms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'hero', item: payload, adminEmail }),
-      }).catch(() => {});
-    } catch {}
+      });
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[saveHeroSlide] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('hero');
-
-  const slides = await getHeroSlides();
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedHeroSlides();
   const updated = isNew
-    ? [...slides, payload]
-    : slides.map((s) => (s.id === slideId ? payload : s));
-  setLocal(KEY_HERO, updated);
+    ? [...currentList, payload]
+    : currentList.map((s) => (s.id === slideId ? payload : s));
+  setLocal(CMS_STORAGE_KEYS.hero, updated);
+
+  invalidateCmsCache('hero');
 
   await logAdminActivity(
     isNew ? 'Added Hero Slide' : 'Updated Hero Slide',
@@ -1041,6 +1310,8 @@ export async function saveHeroSlide(slide, adminEmail) {
 }
 
 export async function deleteHeroSlide(slideId, adminEmail) {
+  // Single Defined Persistence Strategy:
+  let persisted = false;
   if (isFirebaseConfigured && db) {
     try {
       await setDoc(
@@ -1048,26 +1319,35 @@ export async function deleteHeroSlide(slideId, adminEmail) {
         { id: slideId, _deleted: true, updatedAt: new Date().toISOString() },
         { merge: true }
       );
+      persisted = true;
     } catch {
       try {
         await deleteDoc(doc(db, 'cms_hero', slideId));
-      } catch {}
+        persisted = true;
+      } catch (err) {
+        console.warn('[deleteHeroSlide] Direct Firestore delete notice:', err?.message || err);
+      }
     }
   }
 
-  if (typeof window !== 'undefined') {
+  if (!persisted && typeof window !== 'undefined') {
     try {
-      fetch(`/api/cms?type=hero&id=${slideId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
+      const res = await fetch(
+        `/api/cms?type=hero&id=${encodeURIComponent(slideId)}&adminEmail=${encodeURIComponent(adminEmail || '')}`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) persisted = true;
+    } catch (apiErr) {
+      console.warn('[deleteHeroSlide] Server API fallback notice:', apiErr?.message || apiErr);
+    }
   }
 
-  invalidateCmsCache('hero');
+  // Update in-memory cache and localStorage immediately
+  const currentList = getCachedHeroSlides();
+  const updated = currentList.filter((s) => s.id !== slideId);
+  setLocal(CMS_STORAGE_KEYS.hero, updated);
 
-  const slides = await getHeroSlides();
-  const updated = slides.filter((s) => s.id !== slideId);
-  setLocal(KEY_HERO, updated);
+  invalidateCmsCache('hero');
 
   await logAdminActivity('Deleted Hero Slide', `Slide ID: ${slideId}`, adminEmail);
   return { success: true, id: slideId };
@@ -1085,7 +1365,12 @@ export async function uploadImageFile(file, folder = 'uploads') {
     try {
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
       const storageRef = ref(storage, `${folder}/${Date.now()}_${sanitizedName}`);
-      const snapshot = await withTimeout(uploadBytes(storageRef, file), 5000, 'Firebase Storage Upload');
+      const snapshot = await Promise.race([
+        uploadBytes(storageRef, file),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Firebase Storage Upload timed out after 5000ms')), 5000)
+        ),
+      ]);
       const downloadUrl = await getDownloadURL(snapshot.ref);
       return downloadUrl;
     } catch (err) {
