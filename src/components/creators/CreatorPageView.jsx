@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import MobileMenu from '@/components/layout/MobileMenu';
@@ -22,6 +22,11 @@ export default function CreatorPageView() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -509,7 +514,22 @@ export default function CreatorPageView() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {!mounted ? (
+              <div className="space-y-6 animate-pulse py-4" aria-hidden="true">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="h-12 rounded-xl bg-surface-container border border-border-specular/40" />
+                  <div className="h-12 rounded-xl bg-surface-container border border-border-specular/40" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="h-12 rounded-xl bg-surface-container border border-border-specular/40" />
+                  <div className="h-12 rounded-xl bg-surface-container border border-border-specular/40" />
+                </div>
+                <div className="h-12 rounded-xl bg-surface-container border border-border-specular/40" />
+                <div className="h-24 rounded-xl bg-surface-container border border-border-specular/40" />
+                <div className="h-14 rounded-full bg-primary-container/40" />
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
               
               {/* Full Name & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -668,6 +688,7 @@ export default function CreatorPageView() {
               </p>
 
             </form>
+            )}
           </div>
         </section>
 

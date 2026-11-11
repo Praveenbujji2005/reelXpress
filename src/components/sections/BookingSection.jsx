@@ -20,6 +20,11 @@ export default function BookingSection({ onBookingSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto-select package when user clicks a pricing card CTA
   useEffect(() => {
@@ -225,7 +230,26 @@ export default function BookingSection({ onBookingSuccess }) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
+            {!mounted ? (
+              <div className="space-y-4 py-2 animate-pulse" aria-hidden="true">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                  <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                  <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                  <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                </div>
+                <div className="h-12 rounded-xl bg-surface-base border border-border-specular/40" />
+                <div className="h-20 rounded-xl bg-surface-base border border-border-specular/40" />
+                <div className="h-14 rounded-xl bg-primary-container/40" />
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
               {/* Anti-spam honeypot (invisible to real users) */}
               <input
                 type="text"
@@ -378,6 +402,7 @@ export default function BookingSection({ onBookingSuccess }) {
                 )}
               </button>
             </form>
+            )}
           </div>
 
         </div>

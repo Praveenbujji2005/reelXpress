@@ -19,8 +19,13 @@ export default function WhatsAppWidget() {
   const [isMobile, setIsMobile] = useState(false);
   const [message, setMessage] = useState('');
   const [timestamp, setTimestamp] = useState('11:06 AM');
+  const [mounted, setMounted] = useState(false);
   const inputRef = useRef(null);
   const chatWindowRef = useRef(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Detect mobile viewport or touch device
   useEffect(() => {
@@ -121,7 +126,7 @@ export default function WhatsAppWidget() {
     setIsOpen(false);
   };
 
-  if (pathname?.startsWith('/admin')) return null;
+  if (!mounted || pathname?.startsWith('/admin')) return null;
 
   return (
     <div className="whatsapp-widget-root select-none">
