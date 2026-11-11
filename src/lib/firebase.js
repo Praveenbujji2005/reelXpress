@@ -1,6 +1,11 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 /**
@@ -39,7 +44,23 @@ if (typeof window !== 'undefined' || process.env.NODE_ENV !== 'test') {
     if (isFirebaseConfigured) {
       app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
       auth = getAuth(app);
-      db = getFirestore(app);
+
+      // Initialize Firestore with client-side IndexedDB persistence if supported in browser
+      if (typeof window !== 'undefined' && typeof indexedDB !== 'undefined') {
+        try {
+          db = initializeFirestore(app, {
+            localCache: persistentLocalCache({
+              tabManager: persistentMultipleTabManager(),
+            }),
+          });
+        } catch {
+          // If initializeFirestore was already called or persistence not available
+          db = getFirestore(app);
+        }
+      } else {
+        db = getFirestore(app);
+      }
+
       storage = getStorage(app);
     }
   } catch (err) {

@@ -22,9 +22,28 @@ export default function FaqSection() {
   const [faqs, setFaqs] = useState(FAQ_DATA);
   const [openIndex, setOpenIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
+
+    // 1. Instant check from localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('reelxpress_cms_faqs');
+        if (raw) {
+          const cached = JSON.parse(raw);
+          if (Array.isArray(cached) && cached.length > 0) {
+            const active = cached.filter((f) => f.enabled !== false);
+            if (active.length > 0) {
+              setFaqs(active);
+              setIsLoading(false);
+            }
+          }
+        }
+      } catch {}
+    }
+
     async function loadFaqs() {
       try {
         const res = await fetch('/api/cms?type=faqs');
@@ -33,6 +52,7 @@ export default function FaqSection() {
           const active = data.data.filter((f) => f.enabled !== false);
           if (active.length > 0) {
             setFaqs(active);
+            setIsLoading(false);
             return;
           }
         }
@@ -48,12 +68,30 @@ export default function FaqSection() {
             setFaqs(active);
           }
         }
-      } catch {}
+      } catch {} finally {
+        if (isMounted) setIsLoading(false);
+      }
     }
 
     loadFaqs();
+
+    const handleCmsUpdate = (e) => {
+      if (!e.detail?.type || e.detail.type === 'faqs') {
+        getFaqs({ forceRefresh: true }).then((cmsData) => {
+          if (isMounted && cmsData && cmsData.length > 0) {
+            const active = cmsData.filter((f) => f.enabled !== false);
+            if (active.length > 0) {
+              setFaqs(active);
+            }
+          }
+        });
+      }
+    };
+    window.addEventListener('cms-cache-invalidated', handleCmsUpdate);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('cms-cache-invalidated', handleCmsUpdate);
     };
   }, []);
 
@@ -121,29 +159,45 @@ export default function FaqSection() {
             RIGHT COLUMN (Accordion List with ~12px gap)
            ========================================================================= */}
         <div className="reveal-on-scroll lg:col-span-7 flex flex-col gap-3">
-          {displayedFaqs.map((faq, idx) => (
-            <FAQItem
-              key={faq.id || idx}
-              index={idx}
-              faq={faq}
-              isOpen={openIndex === idx}
-              onToggle={() => toggleFaq(idx)}
-            />
-          ))}
+          {isLoading ? (
+            <>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <div
+                  key={n}
+                  className="rounded-xl p-5 bg-[#181216] border border-white/5 flex items-center justify-between ambient-skeleton shadow-sm min-h-[64px]"
+                >
+                  <div className="w-3/4 h-5 rounded-md bg-white/10 ambient-pulse" />
+                  <div className="w-7 h-7 rounded-full bg-white/10 shrink-0 ambient-pulse" />
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="flex flex-col gap-3 fade-in-content">
+              {displayedFaqs.map((faq, idx) => (
+                <FAQItem
+                  key={faq.id || idx}
+                  index={idx}
+                  faq={faq}
+                  isOpen={openIndex === idx}
+                  onToggle={() => toggleFaq(idx)}
+                />
+              ))}
 
-          {/* Below list: Expand / Collapse Toggle if more than 6 FAQs */}
-          {faqs.length > 6 && (
-            <div className="pt-2 sm:pt-3">
-              <button
-                type="button"
-                onClick={() => setShowAll((prev) => !prev)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-glass border border-border-specular hover:border-border-amber text-primary hover:text-primary-container font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer"
-              >
-                <span>{showAll ? 'Show fewer questions' : `View all ${faqs.length} Questions`}</span>
-                <span className="material-symbols-outlined text-base transition-transform duration-200">
-                  {showAll ? 'expand_less' : 'expand_more'}
-                </span>
-              </button>
+              {/* Below list: Expand / Collapse Toggle if more than 6 FAQs */}
+              {faqs.length > 6 && (
+                <div className="pt-2 sm:pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAll((prev) => !prev)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-glass border border-border-specular hover:border-border-amber text-primary hover:text-primary-container font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer"
+                  >
+                    <span>{showAll ? 'Show fewer questions' : `View all ${faqs.length} Questions`}</span>
+                    <span className="material-symbols-outlined text-base transition-transform duration-200">
+                      {showAll ? 'expand_less' : 'expand_more'}
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

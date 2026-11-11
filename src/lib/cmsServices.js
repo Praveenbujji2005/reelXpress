@@ -406,6 +406,39 @@ function setLocal(key, val) {
   } catch {}
 }
 
+// =============================================================================
+// REQUEST DEDUPLICATION, IN-MEMORY CACHE & RESILIENT FETCH ENGINE
+// =============================================================================
+
+const inFlightQueries = new Map();
+const memoryCache = new Map();
+const MEMORY_CACHE_TTL = 3 * 60 * 1000; // 3 minutes fresh in-memory
+const failureCooldown = new Map(); // 15-second cooldown per query key if failed
+
+export function invalidateCmsCache(type) {
+  if (type) {
+    for (const key of memoryCache.keys()) {
+      if (key.includes(type)) memoryCache.delete(key);
+    }
+    for (const key of inFlightQueries.keys()) {
+      if (key.includes(type)) inFlightQueries.delete(key);
+    }
+    for (const key of failureCooldown.keys()) {
+      if (key.includes(type)) failureCooldown.delete(key);
+    }
+  } else {
+    memoryCache.clear();
+    inFlightQueries.clear();
+    failureCooldown.clear();
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new CustomEvent('cms-cache-invalidated', { detail: { type } }));
+    } catch {}
+  }
+}
+
 function withTimeout(promise, ms = 3500, label = 'CMS Operation') {
   return Promise.race([
     promise,
@@ -415,34 +448,99 @@ function withTimeout(promise, ms = 3500, label = 'CMS Operation') {
   ]);
 }
 
-async function safeQueryDocs(colName, sortField, sortDir = 'asc') {
-  if (!isFirebaseConfigured || !db) return null;
-  try {
-    let q;
-    try {
-      q = sortField
-        ? query(collection(db, colName), orderBy(sortField, sortDir))
-        : collection(db, colName);
-    } catch {
-      q = collection(db, colName);
+/**
+ * Resilient, Deduplicated Query Engine:
+ * 1. Checks memory cache for fresh data (< 3 min) -> 0ms return.
+ * 2. Deduplicates concurrent identical queries via shared in-flight Promise.
+ * 3. Prevents hammering on failed network conditions via 15s cooldown.
+ * 4. Queries Firestore Web SDK with sensible 3500ms timeout for initial TLS/WebChannel handshake.
+ * 5. Falls back to internal fast /api/cms endpoint if running on client and SDK connection is slow.
+ * 6. Returns null quietly on complete offline status without breaking UI or spamming console.
+ */
+async function safeQueryDocs(colName, sortField, sortDir = 'asc', options = {}) {
+  const queryKey = `${colName}_${sortField || 'none'}_${sortDir}`;
+
+  // 1. In-memory cache check (instant)
+  if (!options.forceRefresh && memoryCache.has(queryKey)) {
+    const cached = memoryCache.get(queryKey);
+    if (Date.now() - cached.timestamp < MEMORY_CACHE_TTL) {
+      return cached.data;
     }
-    const snap = await withTimeout(getDocs(q), 1800, `Fetch ${colName}`);
-    if (snap && !snap.empty) {
-      return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    }
-    if (snap && snap.empty) {
-      return [];
-    }
-  } catch (err) {
-    console.warn(`[safeQueryDocs] ${colName} read warning:`, err?.message || err);
-    try {
-      const snap = await withTimeout(getDocs(collection(db, colName)), 1200, `Fallback ${colName}`);
-      if (snap && !snap.empty) {
-        return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      }
-    } catch {}
   }
-  return null;
+
+  // 2. In-flight request deduplication
+  if (inFlightQueries.has(queryKey)) {
+    return inFlightQueries.get(queryKey);
+  }
+
+  // 3. Failure cooldown check (prevents spammed timeouts when offline)
+  if (!options.forceRefresh && failureCooldown.has(queryKey)) {
+    const failedAt = failureCooldown.get(queryKey);
+    if (Date.now() - failedAt < 15000) {
+      return null;
+    }
+  }
+
+  const queryPromise = (async () => {
+    // Attempt 1: Direct Firestore client query
+    if (isFirebaseConfigured && db) {
+      try {
+        let q;
+        try {
+          q = sortField
+            ? query(collection(db, colName), orderBy(sortField, sortDir))
+            : collection(db, colName);
+        } catch {
+          q = collection(db, colName);
+        }
+
+        const snap = await withTimeout(getDocs(q), 3500, `Fetch ${colName}`);
+        if (snap) {
+          const docs = snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          memoryCache.set(queryKey, { data: docs, timestamp: Date.now() });
+          return docs;
+        }
+      } catch (err) {
+        // Quiet debug notice; do not spam production console with red warnings
+        if (process.env.NODE_ENV !== 'production') {
+          console.debug(`[safeQueryDocs] ${colName} SDK read notice: ${err?.message || err}. Attempting fallback.`);
+        }
+      }
+    }
+
+    // Attempt 2: Client-side fallback to internal /api/cms endpoint (runs in Node.js server with fast direct connection)
+    if (typeof window !== 'undefined') {
+      try {
+        const typeMap = {
+          cms_hero: 'hero',
+          cms_pricing: 'pricing',
+          cms_testimonials: 'testimonials',
+          cms_faqs: 'faqs',
+          activity_logs: 'activity',
+        };
+        const apiType = typeMap[colName];
+        if (apiType) {
+          const res = await withTimeout(fetch(`/api/cms?type=${apiType}`), 2500, `API ${colName}`);
+          if (res && res.ok) {
+            const json = await res.json();
+            if (json.success && Array.isArray(json.data)) {
+              memoryCache.set(queryKey, { data: json.data, timestamp: Date.now() });
+              return json.data;
+            }
+          }
+        }
+      } catch {}
+    }
+
+    // Mark failure cooldown so repeated component renders don't loop network requests
+    failureCooldown.set(queryKey, Date.now());
+    return null;
+  })().finally(() => {
+    inFlightQueries.delete(queryKey);
+  });
+
+  inFlightQueries.set(queryKey, queryPromise);
+  return queryPromise;
 }
 
 /**
@@ -569,13 +667,19 @@ export async function getActivityLogs() {
 // 4. TESTIMONIALS & REVIEWS CMS
 // =============================================================================
 
-export async function getTestimonials() {
-  const cloud = await safeQueryDocs('cms_testimonials', 'order', 'asc');
-  const merged = mergeCloudWithDefaults(INITIAL_TESTIMONIALS, cloud, {
-    type: 'testimonials',
-  });
-  setLocal(KEY_TESTIMONIALS, merged);
-  return merged;
+export async function getTestimonials(options = {}) {
+  const cached = !options.forceRefresh ? getLocal(KEY_TESTIMONIALS, null) : null;
+  try {
+    const cloud = await safeQueryDocs('cms_testimonials', 'order', 'asc', options);
+    if (cloud) {
+      const merged = mergeCloudWithDefaults(INITIAL_TESTIMONIALS, cloud, {
+        type: 'testimonials',
+      });
+      setLocal(KEY_TESTIMONIALS, merged);
+      return merged;
+    }
+  } catch {}
+  return cached && cached.length > 0 ? cached : INITIAL_TESTIMONIALS;
 }
 
 export async function saveTestimonial(testimonial, adminEmail) {
@@ -616,14 +720,7 @@ export async function saveTestimonial(testimonial, adminEmail) {
     } catch {}
   }
 
-  // Update local cache
-  if (typeof window !== 'undefined') {
-    try {
-      fetch(`/api/cms?type=testimonials&id=${testimonialId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
-  }
+  invalidateCmsCache('testimonials');
 
   const list = await getTestimonials();
   const updated = isNew
@@ -664,6 +761,8 @@ export async function deleteTestimonial(testimonialId, adminEmail) {
     } catch {}
   }
 
+  invalidateCmsCache('testimonials');
+
   const list = await getTestimonials();
   const updated = list.filter((t) => t.id !== testimonialId);
   setLocal(KEY_TESTIMONIALS, updated);
@@ -676,13 +775,19 @@ export async function deleteTestimonial(testimonialId, adminEmail) {
 // 5. PRICING PLANS CMS
 // =============================================================================
 
-export async function getPricingPlans() {
-  const cloud = await safeQueryDocs('cms_pricing', 'order', 'asc');
-  const merged = mergeCloudWithDefaults(INITIAL_PRICING_PLANS, cloud, {
-    type: 'pricing',
-  });
-  setLocal(KEY_PRICING, merged);
-  return merged;
+export async function getPricingPlans(options = {}) {
+  const cached = !options.forceRefresh ? getLocal(KEY_PRICING, null) : null;
+  try {
+    const cloud = await safeQueryDocs('cms_pricing', 'order', 'asc', options);
+    if (cloud) {
+      const merged = mergeCloudWithDefaults(INITIAL_PRICING_PLANS, cloud, {
+        type: 'pricing',
+      });
+      setLocal(KEY_PRICING, merged);
+      return merged;
+    }
+  } catch {}
+  return cached && cached.length > 0 ? cached : INITIAL_PRICING_PLANS;
 }
 
 export async function savePricingPlan(plan, adminEmail) {
@@ -715,13 +820,7 @@ export async function savePricingPlan(plan, adminEmail) {
     } catch {}
   }
 
-  if (typeof window !== 'undefined') {
-    try {
-      fetch(`/api/cms?type=pricing&id=${planId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
-  }
+  invalidateCmsCache('pricing');
 
   const plans = await getPricingPlans();
   const updated = isNew
@@ -760,6 +859,8 @@ export async function deletePricingPlan(planId, adminEmail) {
     } catch {}
   }
 
+  invalidateCmsCache('pricing');
+
   const plans = await getPricingPlans();
   const updated = plans.filter((p) => p.id !== planId);
   setLocal(KEY_PRICING, updated);
@@ -772,13 +873,19 @@ export async function deletePricingPlan(planId, adminEmail) {
 // 6. FAQS CMS
 // =============================================================================
 
-export async function getFaqs() {
-  const cloud = await safeQueryDocs('cms_faqs', 'order', 'asc');
-  const merged = mergeCloudWithDefaults(INITIAL_FAQS, cloud, {
-    type: 'faqs',
-  });
-  setLocal(KEY_FAQS, merged);
-  return merged;
+export async function getFaqs(options = {}) {
+  const cached = !options.forceRefresh ? getLocal(KEY_FAQS, null) : null;
+  try {
+    const cloud = await safeQueryDocs('cms_faqs', 'order', 'asc', options);
+    if (cloud) {
+      const merged = mergeCloudWithDefaults(INITIAL_FAQS, cloud, {
+        type: 'faqs',
+      });
+      setLocal(KEY_FAQS, merged);
+      return merged;
+    }
+  } catch {}
+  return cached && cached.length > 0 ? cached : INITIAL_FAQS;
 }
 
 export async function saveFaq(faq, adminEmail) {
@@ -819,13 +926,7 @@ export async function saveFaq(faq, adminEmail) {
     } catch {}
   }
 
-  if (typeof window !== 'undefined') {
-    try {
-      fetch(`/api/cms?type=faqs&id=${faqId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
-  }
+  invalidateCmsCache('faqs');
 
   const list = await getFaqs();
   const updated = isNew
@@ -864,6 +965,8 @@ export async function deleteFaq(faqId, adminEmail) {
     } catch {}
   }
 
+  invalidateCmsCache('faqs');
+
   const list = await getFaqs();
   const updated = list.filter((f) => f.id !== faqId);
   setLocal(KEY_FAQS, updated);
@@ -876,10 +979,10 @@ export async function deleteFaq(faqId, adminEmail) {
 // 7. HERO CAROUSEL / REELS CMS
 // =============================================================================
 
-export async function getHeroSlides() {
-  const cached = getLocal(KEY_HERO, null);
+export async function getHeroSlides(options = {}) {
+  const cached = !options.forceRefresh ? getLocal(KEY_HERO, null) : null;
   try {
-    const cloud = await safeQueryDocs('cms_hero', 'order', 'asc');
+    const cloud = await safeQueryDocs('cms_hero', 'order', 'asc', options);
     if (cloud) {
       const merged = mergeCloudWithDefaults(INITIAL_HERO_SLIDES, cloud, {
         type: 'hero',
@@ -921,13 +1024,7 @@ export async function saveHeroSlide(slide, adminEmail) {
     } catch {}
   }
 
-  if (typeof window !== 'undefined') {
-    try {
-      fetch(`/api/cms?type=hero&id=${slideId}&adminEmail=${encodeURIComponent(adminEmail || '')}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-    } catch {}
-  }
+  invalidateCmsCache('hero');
 
   const slides = await getHeroSlides();
   const updated = isNew
@@ -965,6 +1062,8 @@ export async function deleteHeroSlide(slideId, adminEmail) {
       }).catch(() => {});
     } catch {}
   }
+
+  invalidateCmsCache('hero');
 
   const slides = await getHeroSlides();
   const updated = slides.filter((s) => s.id !== slideId);

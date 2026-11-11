@@ -50,6 +50,20 @@ export default function PortfolioCarousel({ onShowToast }) {
         }
       })
       .catch(() => {});
+
+    // 3. React to live Admin updates
+    const handleCmsUpdate = (e) => {
+      if (!e.detail?.type || e.detail.type === 'hero') {
+        getHeroSlides({ forceRefresh: true }).then((slides) => {
+          if (slides && slides.length > 0) {
+            const activeSlides = slides.filter((s) => s.enabled !== false);
+            if (activeSlides.length > 0) setReels(activeSlides);
+          }
+        });
+      }
+    };
+    window.addEventListener('cms-cache-invalidated', handleCmsUpdate);
+    return () => window.removeEventListener('cms-cache-invalidated', handleCmsUpdate);
   }, []);
 
   // Track window width for responsive 3D card layout calculations

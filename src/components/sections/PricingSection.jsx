@@ -227,14 +227,71 @@ const WEDDING_PACKAGES = [
   },
 ];
 
+// SKELETON LOADER FOR PRICING CARDS
+function PricingCardSkeleton({ count = 4, colsClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' }) {
+  return (
+    <div className={`grid ${colsClass} gap-4 sm:gap-5 mb-16`}>
+      {Array.from({ length: count }).map((_, idx) => (
+        <div
+          key={idx}
+          className="relative rounded-[28px] sm:rounded-[32px] bg-[#140f13] p-6 sm:p-7 flex flex-col justify-between border border-white/5 min-h-[560px] ambient-skeleton shadow-lg"
+        >
+          <div>
+            <div className="w-20 h-4 rounded-full bg-white/10 mb-3 ambient-pulse" />
+            <div className="w-36 h-7 rounded-lg bg-white/10 mb-3 ambient-pulse" />
+            <div className="w-full h-3.5 rounded bg-white/5 mb-1.5 ambient-pulse" />
+            <div className="w-4/5 h-3.5 rounded bg-white/5 mb-6 ambient-pulse" />
+            <div className="flex items-baseline gap-2 pb-6 border-b border-white/5 mb-6">
+              <div className="w-24 h-8 rounded-lg bg-white/15 ambient-pulse" />
+              <div className="w-14 h-3 rounded bg-white/5 ambient-pulse" />
+            </div>
+            <div className="w-24 h-3 rounded bg-white/10 mb-4 ambient-pulse" />
+            <div className="space-y-3 mb-6">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-white/10 shrink-0 ambient-pulse" />
+                  <div className="h-3.5 rounded bg-white/5 flex-1 ambient-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="w-full h-11 rounded-full bg-white/10 ambient-pulse mt-6" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function PricingSection() {
   const [activeTab, setActiveTab] = useState('instant');
   const [instantPlans, setInstantPlans] = useState(INSTANT_PACKAGES);
   const [businessPlans, setBusinessPlans] = useState(BUSINESS_PACKAGES);
   const [weddingPlans, setWeddingPlans] = useState(WEDDING_PACKAGES);
+  const [isLoading, setIsLoading] = useState(true);
   const tabRefs = useRef([]);
 
   useEffect(() => {
+    // 1. Instant check from localStorage for zero initial wait
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('reelxpress_cms_pricing');
+        if (raw) {
+          const cached = JSON.parse(raw);
+          if (Array.isArray(cached) && cached.length > 0) {
+            const activePlans = cached.filter((p) => p.enabled !== false);
+            const instant = activePlans.filter((p) => p.category === 'instant');
+            const business = activePlans.filter((p) => p.category === 'business');
+            const wedding = activePlans.filter((p) => p.category === 'wedding');
+            if (instant.length > 0) setInstantPlans(instant);
+            if (business.length > 0) setBusinessPlans(business);
+            if (wedding.length > 0) setWeddingPlans(wedding);
+            setIsLoading(false);
+          }
+        }
+      } catch {}
+    }
+
+    // 2. Fetch fresh CMS pricing plans with background sync
     getPricingPlans()
       .then((plans) => {
         if (plans && plans.length > 0) {
@@ -247,7 +304,28 @@ export default function PricingSection() {
           if (wedding.length > 0) setWeddingPlans(wedding);
         }
       })
-      .catch(() => {});
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    // 3. React to live Admin updates
+    const handleCmsUpdate = (e) => {
+      if (!e.detail?.type || e.detail.type === 'pricing') {
+        getPricingPlans({ forceRefresh: true }).then((plans) => {
+          if (plans && plans.length > 0) {
+            const activePlans = plans.filter((p) => p.enabled !== false);
+            const instant = activePlans.filter((p) => p.category === 'instant');
+            const business = activePlans.filter((p) => p.category === 'business');
+            const wedding = activePlans.filter((p) => p.category === 'wedding');
+            if (instant.length > 0) setInstantPlans(instant);
+            if (business.length > 0) setBusinessPlans(business);
+            if (wedding.length > 0) setWeddingPlans(wedding);
+          }
+        });
+      }
+    };
+    window.addEventListener('cms-cache-invalidated', handleCmsUpdate);
+    return () => window.removeEventListener('cms-cache-invalidated', handleCmsUpdate);
   }, []);
 
   // Keyboard navigation for WAI-ARIA tabs pattern
@@ -379,14 +457,25 @@ export default function PricingSection() {
       </div>
 
       {/* 3. Cards Display by Category Panel */}
-      {/* ---------------- INSTANT PACKAGES (4 Cards) ---------------- */}
-      {activeTab === 'instant' && (
-        <div
-          role="tabpanel"
-          id="tabpanel-instant"
-          aria-labelledby="tab-instant"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16"
-        >
+      {isLoading ? (
+        <PricingCardSkeleton
+          count={activeTab === 'business' ? 2 : 4}
+          colsClass={
+            activeTab === 'business'
+              ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+          }
+        />
+      ) : (
+        <>
+          {/* ---------------- INSTANT PACKAGES (4 Cards) ---------------- */}
+          {activeTab === 'instant' && (
+            <div
+              role="tabpanel"
+              id="tabpanel-instant"
+              aria-labelledby="tab-instant"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16 fade-in-content"
+            >
           {instantPlans.map((pkg) => (
             <div
               key={pkg.id}
@@ -484,7 +573,7 @@ export default function PricingSection() {
           role="tabpanel"
           id="tabpanel-business"
           aria-labelledby="tab-business"
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-16 fade-in-content"
         >
           {businessPlans.map((pkg) => (
             <div
@@ -583,7 +672,7 @@ export default function PricingSection() {
           role="tabpanel"
           id="tabpanel-wedding"
           aria-labelledby="tab-wedding"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16 fade-in-content"
         >
           {weddingPlans.map((pkg) => (
             <div
@@ -674,6 +763,8 @@ export default function PricingSection() {
             </div>
           ))}
         </div>
+      )}
+        </>
       )}
     </section>
   );
