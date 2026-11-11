@@ -290,7 +290,7 @@ section[id] {
 #fanned-carousel-track {
   position: relative;
   width: 100%;
-  height: 590px;
+  height: 560px;
   perspective: 1400px;
   transform-style: preserve-3d;
   display: flex;
@@ -300,23 +300,23 @@ section[id] {
 }
 
 @media (max-width: 1200px) {
-  #fanned-carousel-track { height: 540px; }
+  #fanned-carousel-track { height: 515px; }
 }
 @media (max-width: 900px) {
-  #fanned-carousel-track { height: 490px; }
+  #fanned-carousel-track { height: 465px; }
 }
 @media (max-width: 640px) {
   #fanned-carousel-container {
     overflow: hidden;
   }
   #fanned-carousel-track {
-    height: 480px;
+    height: 455px;
     perspective: none !important;
     transform-style: flat !important;
   }
 }
 @media (max-width: 380px) {
-  #fanned-carousel-track { height: 440px; }
+  #fanned-carousel-track { height: 418px; }
 }
 
 /* Individual Fanned Portrait Card */
@@ -324,9 +324,9 @@ section[id] {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 290px;
+  width: 275px;
   aspect-ratio: 9/16;
-  border-radius: 24px;
+  border-radius: 22px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #110e11;

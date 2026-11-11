@@ -85,6 +85,18 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
         />
+        {/* Same-origin proxy configuration for delivery SDK */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                window.__DELIVERY_SDK_BASE_URL__ = '/api/delivery-sdk';
+                window.LINER_BASE_URL = '/api/delivery-sdk';
+                window.deliverySdkBaseUrl = '/api/delivery-sdk';
+              } catch (_) {}
+            `,
+          }}
+        />
       </head>
       <body
         className={`${cormorantGaramond.variable} bg-background text-text-primary antialiased selection:bg-primary-container selection:text-text-primary min-h-screen min-h-[100dvh] relative font-sans`}

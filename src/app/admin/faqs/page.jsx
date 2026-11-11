@@ -153,7 +153,20 @@ export default function AdminFaqsPage() {
 
       {/* FAQ List */}
       {loading ? (
-        <div className="py-20 text-center text-text-muted">Loading FAQs...</div>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div
+              key={n}
+              className="rounded-2xl bg-[#151215] border border-white/5 p-4 flex items-center justify-between ambient-skeleton min-h-[64px]"
+            >
+              <div className="space-y-2 flex-1">
+                <div className="w-2/3 h-4 rounded bg-white/10 ambient-pulse" />
+                <div className="w-1/3 h-3 rounded bg-white/5 ambient-pulse" />
+              </div>
+              <div className="w-20 h-8 rounded-lg bg-white/10 shrink-0 ambient-pulse" />
+            </div>
+          ))}
+        </div>
       ) : filteredFaqs.length === 0 ? (
         <div className="py-20 text-center text-text-muted border border-dashed border-white/10 rounded-3xl">
           No FAQs found matching your search.

@@ -22,7 +22,7 @@ import { getTestimonials, getCachedTestimonials } from '@/lib/cmsServices';
 // SKELETON PLACEHOLDER FOR TESTIMONIAL CARDS
 function TestimonialCardSkeleton() {
   return (
-    <div className="w-[320px] sm:w-[380px] h-[210px] rounded-2xl p-6 bg-[#161217] border border-white/10 flex flex-col justify-between ambient-skeleton shrink-0 shadow-lg">
+    <div className="w-[266px] sm:w-[304px] md:w-[323px] h-[200px] rounded-2xl p-4.5 sm:p-5 md:p-6 bg-[#161217] border border-white/10 flex flex-col justify-between ambient-skeleton shrink-0 shadow-lg">
       <div>
         <div className="flex gap-1.5 mb-3">
           {[1, 2, 3, 4, 5].map((s) => (

@@ -159,7 +159,27 @@ export default function AdminHeroPage() {
 
       {/* Slides Grid */}
       {loading ? (
-        <div className="py-20 text-center text-text-muted">Loading carousel slides...</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((n) => (
+            <div
+              key={n}
+              className="rounded-3xl bg-[#151215] border border-white/5 overflow-hidden shadow-xl flex flex-col ambient-skeleton min-h-[380px]"
+            >
+              <div className="aspect-[9/16] max-h-[220px] bg-white/5 ambient-pulse" />
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="w-16 h-3 rounded-full bg-white/10 ambient-pulse" />
+                  <div className="w-3/4 h-5 rounded bg-white/10 ambient-pulse" />
+                  <div className="w-1/2 h-3 rounded bg-white/5 ambient-pulse" />
+                </div>
+                <div className="pt-4 border-t border-white/5 flex justify-between items-center mt-4">
+                  <div className="w-16 h-3 rounded bg-white/10 ambient-pulse" />
+                  <div className="w-16 h-8 rounded-xl bg-white/10 ambient-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : slides.length === 0 ? (
         <div className="py-20 text-center text-text-muted border border-dashed border-white/10 rounded-3xl">
           No carousel slides found. Click &quot;Add New Reel Slide&quot; to create one.

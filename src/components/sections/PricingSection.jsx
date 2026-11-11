@@ -230,32 +230,32 @@ const WEDDING_PACKAGES = [
 // SKELETON LOADER FOR PRICING CARDS
 function PricingCardSkeleton({ count = 4, colsClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' }) {
   return (
-    <div className={`grid ${colsClass} gap-4 sm:gap-5 mb-16`}>
+    <div className={`grid ${colsClass} gap-3.5 sm:gap-4.5 mb-14`}>
       {Array.from({ length: count }).map((_, idx) => (
         <div
           key={idx}
-          className="relative rounded-[28px] sm:rounded-[32px] bg-[#140f13] p-6 sm:p-7 flex flex-col justify-between border border-white/5 min-h-[560px] ambient-skeleton shadow-lg"
+          className="relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-5 sm:p-6 flex flex-col justify-between border border-white/5 min-h-[530px] ambient-skeleton shadow-lg"
         >
           <div>
-            <div className="w-20 h-4 rounded-full bg-white/10 mb-3 ambient-pulse" />
-            <div className="w-36 h-7 rounded-lg bg-white/10 mb-3 ambient-pulse" />
-            <div className="w-full h-3.5 rounded bg-white/5 mb-1.5 ambient-pulse" />
-            <div className="w-4/5 h-3.5 rounded bg-white/5 mb-6 ambient-pulse" />
-            <div className="flex items-baseline gap-2 pb-6 border-b border-white/5 mb-6">
-              <div className="w-24 h-8 rounded-lg bg-white/15 ambient-pulse" />
-              <div className="w-14 h-3 rounded bg-white/5 ambient-pulse" />
+            <div className="w-20 h-3.5 rounded-full bg-white/10 mb-2.5 ambient-pulse" />
+            <div className="w-32 h-6 rounded-lg bg-white/10 mb-2.5 ambient-pulse" />
+            <div className="w-full h-3 rounded bg-white/5 mb-1.5 ambient-pulse" />
+            <div className="w-4/5 h-3 rounded bg-white/5 mb-5 ambient-pulse" />
+            <div className="flex items-baseline gap-2 pb-5 border-b border-white/5 mb-5">
+              <div className="w-20 h-7 rounded-lg bg-white/15 ambient-pulse" />
+              <div className="w-12 h-3 rounded bg-white/5 ambient-pulse" />
             </div>
-            <div className="w-24 h-3 rounded bg-white/10 mb-4 ambient-pulse" />
-            <div className="space-y-3 mb-6">
+            <div className="w-20 h-3 rounded bg-white/10 mb-3.5 ambient-pulse" />
+            <div className="space-y-2.5 mb-5">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-white/10 shrink-0 ambient-pulse" />
-                  <div className="h-3.5 rounded bg-white/5 flex-1 ambient-pulse" />
+                  <div className="w-3.5 h-3.5 rounded-full bg-white/10 shrink-0 ambient-pulse" />
+                  <div className="h-3 rounded bg-white/5 flex-1 ambient-pulse" />
                 </div>
               ))}
             </div>
           </div>
-          <div className="w-full h-11 rounded-full bg-white/10 ambient-pulse mt-6" />
+          <div className="w-full h-10 rounded-full bg-white/10 ambient-pulse mt-5" />
         </div>
       ))}
     </div>
@@ -436,15 +436,66 @@ export default function PricingSection() {
 
         {activeTab === 'instant' && (
           <>
-            <span className="text-[#ff6d29] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] block mb-2.5">
+            <span className="text-[#ff6d29] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] block mb-2">
               INSTANT CONTENT PACKAGES
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
               Minutes to Delivery. <span className="font-serif italic font-normal text-white/70">Zero Hassle.</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#a8a1a8] mt-3 max-w-xl mx-auto leading-relaxed">
-              On-spot iPhone vertical video shoots and instant editing for individuals, creators, and venues.
+            <p className="text-xs sm:text-sm text-[#a8a1a8] mt-2 max-w-xl mx-auto leading-relaxed">
+              On-spot iPhone vertical video shoots and instant editing for individuals, creators, brands, and events.
             </p>
+
+            {/* Instant Packages Info & Guarantees Strip */}
+            <div className="mt-6 mb-2 max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 text-left">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-base">bolt</span>
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-white">15–30 Min Turnaround</h4>
+                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
+                    Edited &amp; color-graded live on-site before your shoot concludes.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-base">phone_iphone</span>
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-white">Flagship 4K HDR</h4>
+                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
+                    Shot on latest iPhone Pro with DJI gimbals &amp; wireless mics.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-base">share</span>
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-white">Direct AirDrop / Link</h4>
+                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
+                    Instant zero-loss transfer straight to your phone. Ready to post.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#161115] border border-white/10 flex items-start gap-2.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#ff6d29]/15 border border-[#ff6d29]/30 flex items-center justify-center text-[#ff6d29] shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-base">music_note</span>
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-white">Trending Audio &amp; Cuts</h4>
+                  <p className="text-[10px] sm:text-[11px] text-[#a8a1a8] leading-snug mt-0.5">
+                    Viral sound selection, fast hooks, and free revisions included.
+                  </p>
+                </div>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -467,12 +518,12 @@ export default function PricingSection() {
               role="tabpanel"
               id="tabpanel-instant"
               aria-labelledby="tab-instant"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16 fade-in-content"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5 mb-14 fade-in-content"
             >
           {instantPlans.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative rounded-[28px] sm:rounded-[32px] bg-[#140f13] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
+              className={`relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-5 sm:p-6 min-h-[530px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 pkg.isPopular
                   ? 'border border-[#ff6d29]/70 shadow-[0_12px_40px_rgba(255,109,41,0.22)]'
                   : 'border border-white/10 hover:border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
@@ -485,19 +536,19 @@ export default function PricingSection() {
               )}
 
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6d29] mb-2 block">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#ff6d29] mb-1.5 block">
                   {pkg.tag}
                 </span>
 
-                <h3 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-2">
+                <h3 className="text-xl sm:text-[24px] font-extrabold text-white tracking-tight mb-1.5">
                   {pkg.name}
                 </h3>
 
-                <p className="text-xs sm:text-[13px] text-[#a8a1a8] leading-relaxed mb-6 font-normal min-h-[44px]">
+                <p className="text-xs sm:text-[12.5px] text-[#a8a1a8] leading-relaxed mb-5 font-normal min-h-[40px]">
                   {pkg.description}
                 </p>
 
-                <div className="flex items-baseline gap-1.5 pb-6 border-b border-white/10 mb-6">
+                <div className="flex items-baseline gap-1.5 pb-5 border-b border-white/10 mb-5">
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     {pkg.price}
                   </span>
@@ -566,12 +617,12 @@ export default function PricingSection() {
           role="tabpanel"
           id="tabpanel-business"
           aria-labelledby="tab-business"
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto mb-16 fade-in-content"
+          className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-7 max-w-4xl mx-auto mb-14 fade-in-content"
         >
           {businessPlans.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative rounded-[28px] sm:rounded-[32px] bg-[#140f13] p-7 sm:p-9 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
+              className={`relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-6 sm:p-7 min-h-[530px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 pkg.isPopular
                   ? 'border border-[#ff6d29]/70 shadow-[0_12px_40px_rgba(255,109,41,0.22)]'
                   : 'border border-white/10 hover:border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
@@ -584,19 +635,19 @@ export default function PricingSection() {
               )}
 
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6d29] mb-2 block">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#ff6d29] mb-1.5 block">
                   {pkg.tag}
                 </span>
 
-                <h3 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-2">
+                <h3 className="text-xl sm:text-[24px] font-extrabold text-white tracking-tight mb-1.5">
                   {pkg.name}
                 </h3>
 
-                <p className="text-xs sm:text-[13px] text-[#a8a1a8] leading-relaxed mb-6 font-normal min-h-[44px]">
+                <p className="text-xs sm:text-[12.5px] text-[#a8a1a8] leading-relaxed mb-5 font-normal min-h-[40px]">
                   {pkg.description}
                 </p>
 
-                <div className="flex items-baseline gap-1.5 pb-6 border-b border-white/10 mb-6">
+                <div className="flex items-baseline gap-1.5 pb-5 border-b border-white/10 mb-5">
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     {pkg.price}
                   </span>
@@ -634,7 +685,7 @@ export default function PricingSection() {
               <a
                 href="#booking"
                 onClick={(e) => handleBooking(e, pkg.shootType)}
-                className={`group w-full mt-8 py-3.5 px-6 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6d29] ${
+                className={`group w-full mt-7 py-3 px-6 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6d29] ${
                   pkg.btnVariant === 'white'
                     ? 'bg-white hover:bg-white/90 text-black shadow-lg font-extrabold'
                     : 'bg-[#ff6d29] hover:bg-[#ff5500] text-white shadow-[0_8px_25px_rgba(255,109,41,0.4)]'
@@ -665,12 +716,12 @@ export default function PricingSection() {
           role="tabpanel"
           id="tabpanel-wedding"
           aria-labelledby="tab-wedding"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-16 fade-in-content"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5 mb-14 fade-in-content"
         >
           {weddingPlans.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative rounded-[28px] sm:rounded-[32px] bg-[#140f13] p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
+              className={`relative rounded-[24px] sm:rounded-[28px] bg-[#140f13] p-5 sm:p-6 min-h-[530px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 pkg.isPopular
                   ? 'border border-[#ff6d29]/70 shadow-[0_12px_40px_rgba(255,109,41,0.22)]'
                   : 'border border-white/10 hover:border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
@@ -683,19 +734,19 @@ export default function PricingSection() {
               )}
 
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6d29] mb-2 block">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#ff6d29] mb-1.5 block">
                   {pkg.tag}
                 </span>
 
-                <h3 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-2">
+                <h3 className="text-xl sm:text-[24px] font-extrabold text-white tracking-tight mb-1.5">
                   {pkg.name}
                 </h3>
 
-                <p className="text-xs sm:text-[13px] text-[#a8a1a8] leading-relaxed mb-6 font-normal min-h-[44px]">
+                <p className="text-xs sm:text-[12.5px] text-[#a8a1a8] leading-relaxed mb-5 font-normal min-h-[40px]">
                   {pkg.description}
                 </p>
 
-                <div className="flex items-baseline gap-1.5 pb-6 border-b border-white/10 mb-6">
+                <div className="flex items-baseline gap-1.5 pb-5 border-b border-white/10 mb-5">
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     {pkg.price}
                   </span>

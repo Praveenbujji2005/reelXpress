@@ -166,7 +166,39 @@ export default function AdminPricingPage() {
 
       {/* Plans Grid */}
       {loading ? (
-        <div className="py-20 text-center text-text-muted">Loading pricing packages...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <div
+              key={n}
+              className="rounded-3xl bg-[#151215] border border-white/5 p-6 flex flex-col justify-between shadow-xl ambient-skeleton min-h-[360px]"
+            >
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <div className="w-20 h-3 rounded-full bg-white/10 ambient-pulse" />
+                  <div className="w-16 h-4 rounded-full bg-white/10 ambient-pulse" />
+                </div>
+                <div className="w-40 h-6 rounded-lg bg-white/10 mb-2 ambient-pulse" />
+                <div className="w-full h-3 rounded bg-white/5 mb-4 ambient-pulse" />
+                <div className="my-4 pb-4 border-b border-white/5 flex gap-2 items-baseline">
+                  <div className="w-24 h-7 rounded bg-white/15 ambient-pulse" />
+                  <div className="w-12 h-3 rounded bg-white/5 ambient-pulse" />
+                </div>
+                <div className="space-y-2 mb-6">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <div className="w-3.5 h-3.5 rounded-full bg-white/10 shrink-0 ambient-pulse" />
+                      <div className="w-48 h-3 rounded bg-white/5 ambient-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="pt-4 border-t border-white/5 flex justify-between">
+                <div className="w-20 h-4 rounded bg-white/10 ambient-pulse" />
+                <div className="w-16 h-8 rounded-xl bg-white/10 ambient-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : filteredPlans.length === 0 ? (
         <div className="py-20 text-center text-text-muted border border-dashed border-white/10 rounded-3xl">
           No pricing plans found in this category.

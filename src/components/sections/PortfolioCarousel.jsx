@@ -75,11 +75,11 @@ export default function PortfolioCarousel({ onShowToast }) {
       const isMobile = windowWidth < 640;
       const isTablet = windowWidth >= 640 && windowWidth < 1024;
 
-      let spacing = 175;
+      let spacing = 165;
       if (isMobile) {
-        spacing = Math.min(Math.round(windowWidth * 0.28), 120);
+        spacing = Math.min(Math.round(windowWidth * 0.26), 114);
       } else if (isTablet) {
-        spacing = 130;
+        spacing = 124;
       }
 
       let diff = (index - activeReelIndex) % totalCards;
@@ -99,8 +99,8 @@ export default function PortfolioCarousel({ onShowToast }) {
 
       if (isMobile) {
         // Pure horizontal sliding animation on mobile - zero 3D rotation, zero tilt, zero vertical drop
-        const cardWidth = Math.min(Math.round(windowWidth * 0.72), 260);
-        const cardGap = 16;
+        const cardWidth = Math.min(Math.round(windowWidth * 0.70), 248);
+        const cardGap = 15;
         const mobileSpacing = cardWidth + cardGap;
         tx = diff * mobileSpacing;
         ty = 0;

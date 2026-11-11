@@ -34,7 +34,7 @@ export default function HowItWorksSection() {
           {HOW_IT_WORKS_STEPS.map((stepItem) => (
             <div
               key={stepItem.step}
-              className={`reveal-on-scroll spotlight-card p-6 rounded-2xl ${
+              className={`reveal-on-scroll spotlight-card p-5 sm:p-5.5 rounded-2xl ${
                 stepItem.isHighlight
                   ? 'bg-surface-glass-tinted border border-border-amber backdrop-blur-xl shadow-[0_0_20px_rgba(255,109,41,0.15)]'
                   : 'bg-surface-glass border border-border-specular backdrop-blur-xl hover:border-border-amber'

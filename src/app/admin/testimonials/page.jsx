@@ -134,7 +134,33 @@ export default function AdminTestimonialsPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="py-20 text-center text-text-muted">Loading reviews...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <div
+              key={n}
+              className="rounded-3xl bg-[#151215] border border-white/5 p-6 flex flex-col justify-between shadow-xl ambient-skeleton min-h-[260px]"
+            >
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-white/10 shrink-0 ambient-pulse" />
+                  <div className="space-y-2 flex-1">
+                    <div className="w-32 h-4 rounded bg-white/10 ambient-pulse" />
+                    <div className="w-24 h-3 rounded bg-white/5 ambient-pulse" />
+                  </div>
+                </div>
+                <div className="space-y-2 my-4">
+                  <div className="w-full h-3 rounded bg-white/10 ambient-pulse" />
+                  <div className="w-5/6 h-3 rounded bg-white/10 ambient-pulse" />
+                  <div className="w-2/3 h-3 rounded bg-white/5 ambient-pulse" />
+                </div>
+              </div>
+              <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                <div className="w-16 h-3 rounded bg-white/10 ambient-pulse" />
+                <div className="w-16 h-8 rounded-xl bg-white/10 ambient-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : testimonials.length === 0 ? (
         <div className="py-20 text-center text-text-muted border border-dashed border-white/10 rounded-3xl">
           No testimonials found.
