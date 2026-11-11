@@ -1,10 +1,12 @@
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
+import { SITE_CONFIG } from '@/config/site';
 import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
 import AmbientOrbs from '@/components/ui/AmbientOrbs';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 import WhatsAppWidget from '@/components/ui/WhatsAppWidget/WhatsAppWidget';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -22,9 +24,8 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata = {
-  title: "reelXpress | Bengaluru's First Quick Content Service",
-  description:
-    'We Shoot • Edit • Deliver Reels in Minutes. You live the moment. reelXpress captures it — instantly. Shot on latest iPhone gear with on-spot live editing and fast cloud delivery.',
+  title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+  description: SITE_CONFIG.description,
   keywords: [
     'Reel Maker',
     'Instagram Reels',
@@ -36,22 +37,32 @@ export const metadata = {
     'Vehicle Shoot',
     'Model Shoot',
   ],
-  authors: [{ name: 'QUANTELLOVENTURES PRIVATE LIMITED' }],
-  metadataBase: new URL('https://www.reelxpress.com'),
+  authors: [{ name: SITE_CONFIG.legalName }],
+  metadataBase: new URL(SITE_CONFIG.canonicalUrl),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: "reelXpress | Bengaluru's First Quick Content Service",
-    description:
-      'We Shoot • Edit • Deliver Reels in Minutes. You live the moment. reelXpress captures it — instantly.',
-    url: 'https://www.reelxpress.com',
-    siteName: 'reelXpress',
+    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    url: SITE_CONFIG.canonicalUrl,
+    siteName: SITE_CONFIG.name,
     locale: 'en_IN',
     type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'reelXpress - Shoot • Edit • Deliver Reels in Minutes',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "reelXpress | Bengaluru's First Quick Content Service",
-    description:
-      'We Shoot • Edit • Deliver Reels in Minutes. You live the moment. reelXpress captures it — instantly.',
+    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    images: ['/og-image.png'],
   },
 };
 
@@ -59,6 +70,7 @@ export const viewport = {
   themeColor: '#151215',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }) {
@@ -68,34 +80,36 @@ export default function RootLayout({ children }) {
         {/* Official Brand Favicon & Touch Icon */}
         <link rel="icon" href="/brand/icon-gold.png" type="image/png" />
         <link rel="apple-touch-icon" href="/brand/icon-gold.png" />
-        {/* Google Material Symbols Outlined Icon Font */}
+        {/* Google Material Symbols Outlined Icon Font with display=block to prevent text flash */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
         />
       </head>
       <body
-        className={`${cormorantGaramond.variable} bg-background text-text-primary antialiased selection:bg-primary-container selection:text-text-primary min-h-screen relative font-sans`}
+        className={`${cormorantGaramond.variable} bg-background text-text-primary antialiased selection:bg-primary-container selection:text-text-primary min-h-screen min-h-[100dvh] relative font-sans`}
         suppressHydrationWarning
       >
-        <SmoothScrollProvider>
-          {/* Top GPU Scroll Progress Bar */}
-          <ScrollProgress />
+        <ErrorBoundary>
+          <SmoothScrollProvider>
+            {/* Top GPU Scroll Progress Bar */}
+            <ScrollProgress />
 
-          {/* Background Ambient Glowing Orbs */}
-          <AmbientOrbs />
+            {/* Background Ambient Glowing Orbs */}
+            <AmbientOrbs />
 
-          {/* Application Page Flow */}
-          <div className="relative z-10 flex flex-col min-h-screen">
-            {children}
-          </div>
-        </SmoothScrollProvider>
+            {/* Application Page Flow */}
+            <div className="relative z-10 flex flex-col min-h-screen min-h-[100dvh]">
+              {children}
+            </div>
+          </SmoothScrollProvider>
 
-        {/* Persistent Floating Bottom-Left Action Buttons - Viewport-fixed overlay across all sections */}
-        <FloatingActionButtons />
+          {/* Persistent Floating Bottom-Left Action Buttons */}
+          <FloatingActionButtons />
 
-        {/* Persistent Floating WhatsApp Chat Widget (Bottom-Right) */}
-        <WhatsAppWidget />
+          {/* Persistent Floating WhatsApp Chat Widget (Bottom-Right) */}
+          <WhatsAppWidget />
+        </ErrorBoundary>
       </body>
     </html>
   );
