@@ -239,7 +239,7 @@ export default function WhatsAppWidget() {
 
           {/* Message Composer Section */}
           <div className="bg-[#F0F2F5] p-3 border-t border-gray-200/90 relative z-10">
-            <form onSubmit={handleSend} className="flex items-center gap-2">
+            <form onSubmit={handleSend} className="flex items-center gap-2" suppressHydrationWarning>
               <input
                 ref={inputRef}
                 type="text"

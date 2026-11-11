@@ -13,6 +13,8 @@ export default function AdminCreatorsPage() {
   const { user } = useAdminAuth();
   const [creators, setCreators] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorNotice, setErrorNotice] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   // Search & Filters
   const [search, setSearch] = useState('');
@@ -331,14 +333,27 @@ export default function AdminCreatorsPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Creator Queries &amp; Applications
             </h1>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Firebase Firestore Sync</span>
-            </div>
+            {isConnected ? (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Firebase Firestore Sync</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Local Cache / Connecting</span>
+              </div>
+            )}
           </div>
           <p className="text-sm text-text-muted mt-1.5">
             Review, approve, and contact content creator applicants in real-time from the website.
           </p>
+          {errorNotice && (
+            <div className="mt-3 p-3.5 rounded-xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-xs flex items-center gap-2 animate-fadeIn">
+              <span className="material-symbols-outlined text-amber-400 text-base shrink-0">info</span>
+              <span>{errorNotice}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

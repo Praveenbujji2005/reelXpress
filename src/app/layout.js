@@ -75,7 +75,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`dark ${plusJakartaSans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${plusJakartaSans.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* Official Brand Favicon & Touch Icon */}
         <link rel="icon" href="/brand/icon-gold.png" type="image/png" />

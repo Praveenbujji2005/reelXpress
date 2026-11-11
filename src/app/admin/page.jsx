@@ -552,8 +552,8 @@ export default function AdminDashboardPage() {
               <p className="text-xs text-text-muted">No recent admin actions recorded.</p>
             ) : (
               <div className="space-y-3">
-                {activityLogs.map((log) => (
-                  <div key={log.id} className="text-xs pb-3 border-b border-white/5 last:border-b-0">
+                {activityLogs.map((log, idx) => (
+                  <div key={`${log.id || 'log'}-${idx}`} className="text-xs pb-3 border-b border-white/5 last:border-b-0">
                     <div className="text-white font-medium">{log.action}</div>
                     <div className="text-text-muted text-[11px] mt-0.5">
                       {log.userEmail} · {new Date(log.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

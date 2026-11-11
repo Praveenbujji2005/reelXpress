@@ -225,7 +225,7 @@ export default function BookingSection({ onBookingSuccess }) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
               {/* Anti-spam honeypot (invisible to real users) */}
               <input
                 type="text"

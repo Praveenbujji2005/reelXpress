@@ -33,9 +33,9 @@ export default function AdminActivityPage() {
           <div className="py-20 text-center text-text-muted">No activity recorded yet.</div>
         ) : (
           <div className="space-y-4">
-            {logs.map((log) => (
+            {logs.map((log, idx) => (
               <div
-                key={log.id}
+                key={`${log.id || 'log'}-${idx}`}
                 className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 rounded-2xl bg-[#0c0a0c] border border-white/10 text-sm"
               >
                 <div className="flex items-start gap-3">

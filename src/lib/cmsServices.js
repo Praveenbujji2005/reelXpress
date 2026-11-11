@@ -530,7 +530,7 @@ function mergeCloudWithDefaults(defaults, cloudDocs, options = {}) {
 // =============================================================================
 export async function logAdminActivity(action, details, adminEmail = 'admin@reelxpress.com') {
   const entry = {
-    id: 'act_' + Date.now(),
+    id: 'act_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
     action,
     details,
     adminEmail,
