@@ -10,14 +10,35 @@ export default function PortfolioCarousel({ onShowToast }) {
   const [activeReelIndex, setActiveReelIndex] = useState(3); // Center card active by default
   const [windowWidth, setWindowWidth] = useState(1200);
 
+  // Per-card media loading and failure states for flawless skeleton shimmers
+  const [loadedImages, setLoadedImages] = useState({});
+  const [failedImages, setFailedImages] = useState({});
+
   const dragStartX = useRef(0);
   const dragStartY = useRef(0);
   const hasDragged = useRef(false);
 
   const totalCards = reels.length;
 
-  // Load latest dynamic hero slides from CMS / Firestore
+  // Load dynamic hero slides from CMS / Firestore with instantaneous cache fast-path
   useEffect(() => {
+    // 1. Instant cache fast-path to prevent network delay on initial render
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('reelxpress_cms_hero');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const activeSlides = parsed.filter((s) => s.enabled !== false);
+            if (activeSlides.length > 0) {
+              setReels(activeSlides);
+            }
+          }
+        }
+      } catch {}
+    }
+
+    // 2. Background revalidation
     getHeroSlides()
       .then((slides) => {
         if (slides && slides.length > 0) {
@@ -192,8 +213,35 @@ export default function PortfolioCarousel({ onShowToast }) {
     }
   };
 
+  // Determine media readiness for smart loading indicators
+  const activeReel = reels[activeReelIndex];
+  const isActiveLoaded = activeReel ? Boolean(loadedImages[activeReel.id]) : false;
+  const loadedCount = Object.keys(loadedImages).length;
+
   return (
     <div id="fanned-carousel-container" className="my-6 md:my-10 relative w-full overflow-hidden sm:overflow-visible">
+      {/* Dynamic Status / Visual Readiness Indicator */}
+      <div className="flex items-center justify-center mb-4 sm:mb-6 relative z-20">
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-glass border border-white/10 text-xs font-medium text-text-muted backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-300">
+          {!isActiveLoaded && loadedCount === 0 ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-primary-container rec-indicator" />
+              <span className="text-white font-semibold">Getting the visuals ready...</span>
+            </>
+          ) : !isActiveLoaded ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-primary-container rec-indicator" />
+              <span className="text-white font-semibold">Loading the latest reels...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              <span className="text-white/90">Swipe or tap any reel to preview • Direct from Bengaluru creators</span>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* 3D Perspective Stage Track */}
       <div
         id="fanned-carousel-track"
@@ -203,6 +251,15 @@ export default function PortfolioCarousel({ onShowToast }) {
         {reels.map((reel, index) => {
           const isCenter = index === activeReelIndex;
           const cardStyle = getCardStyle(index);
+
+          let diff = (index - activeReelIndex) % totalCards;
+          if (diff > Math.floor(totalCards / 2)) diff -= totalCards;
+          if (diff < -Math.floor(totalCards / 2)) diff += totalCards;
+          const absDiff = Math.abs(diff);
+
+          const isLoaded = Boolean(loadedImages[reel.id]);
+          const hasFailed = Boolean(failedImages[reel.id]);
+          const posterWebp = reel.poster?.replace(/\.jpg$/, '.webp');
 
           return (
             <div
@@ -223,16 +280,56 @@ export default function PortfolioCarousel({ onShowToast }) {
                 }
               }}
             >
-              {/* Single Frame / Photo of the Video - Explicit width/height to prevent layout shift */}
-              <img
-                src={reel.poster}
-                alt={reel.title || 'Reel Photo'}
-                width={290}
-                height={516}
-                loading={isCenter ? 'eager' : 'lazy'}
-                decoding="async"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+              {/* Skeleton Shimmer Placeholder: Displayed in background until media completes decoding */}
+              {!isLoaded && !hasFailed && (
+                <div
+                  className="absolute inset-0 ambient-skeleton flex flex-col items-center justify-center pointer-events-none z-0"
+                  aria-hidden="true"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3 text-primary-container/70 ambient-pulse shadow-inner">
+                    <span className="material-symbols-outlined text-2xl">movie</span>
+                  </div>
+                  <div className="w-16 h-1.5 rounded-full bg-white/10 ambient-pulse mb-1.5" />
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-primary-container/80">
+                    Preparing reel...
+                  </span>
+                </div>
+              )}
+
+              {/* Fallback View: Displayed if media network request encounters an error */}
+              {hasFailed && (
+                <div className="absolute inset-0 bg-[#161217] flex flex-col items-center justify-center p-6 text-center z-10 border border-white/10">
+                  <div className="w-12 h-12 rounded-full bg-primary-container/20 border border-primary-container/40 flex items-center justify-center text-primary-container mb-3">
+                    <span className="material-symbols-outlined text-xl">videocam</span>
+                  </div>
+                  <p className="text-xs font-bold text-white mb-1">{reel.title || 'ReelXpress Visual'}</p>
+                  <p className="text-[11px] text-text-muted">Tap to view on Instagram</p>
+                </div>
+              )}
+
+              {/* High-Performance Modern WebP Image with JPG Fallback */}
+              <picture className="w-full h-full block">
+                {posterWebp && <source srcSet={posterWebp} type="image/webp" />}
+                <img
+                  ref={(node) => {
+                    if (node && node.complete && node.naturalWidth > 0 && !loadedImages[reel.id]) {
+                      setLoadedImages((prev) => ({ ...prev, [reel.id]: true }));
+                    }
+                  }}
+                  src={reel.poster}
+                  alt={reel.title || 'Reel Photo'}
+                  width={290}
+                  height={516}
+                  loading={absDiff <= 1 ? 'eager' : 'lazy'}
+                  fetchPriority={isCenter ? 'high' : absDiff === 1 ? 'auto' : 'low'}
+                  decoding="async"
+                  onLoad={() => setLoadedImages((prev) => ({ ...prev, [reel.id]: true }))}
+                  onError={() => setFailedImages((prev) => ({ ...prev, [reel.id]: true }))}
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105 z-10 ${
+                    isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                  }`}
+                />
+              </picture>
 
               {/* Subtle interactive hover highlight (zero text, purely the photo) */}
               <div

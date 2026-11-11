@@ -205,6 +205,7 @@ export default function ReelModal({ isOpen, reel, onClose, onShowToast }) {
           <video
             ref={videoRef}
             src={reel.videoSrc}
+            poster={reel.poster}
             playsInline
             webkit-playsinline="true"
             x5-playsinline="true"
@@ -234,9 +235,14 @@ export default function ReelModal({ isOpen, reel, onClose, onShowToast }) {
             </button>
           )}
 
-          {/* Buffering Spinner */}
+          {/* Buffering & Loading Message Overlay */}
           {isLoading && (
-            <div className="absolute inset-0 m-auto w-12 h-12 rounded-full border-3 border-white/20 border-t-primary-container player-spinner z-25 pointer-events-none" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] z-25 pointer-events-none transition-all duration-300">
+              <div className="w-12 h-12 rounded-full border-3 border-white/20 border-t-primary-container player-spinner mb-3" />
+              <span className="text-xs font-semibold text-white tracking-wide bg-black/70 px-3.5 py-1.5 rounded-full border border-white/10 shadow-lg">
+                Preparing your experience...
+              </span>
+            </div>
           )}
 
           {/* Playback Error Overlay */}

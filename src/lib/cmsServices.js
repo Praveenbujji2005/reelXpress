@@ -426,7 +426,7 @@ async function safeQueryDocs(colName, sortField, sortDir = 'asc') {
     } catch {
       q = collection(db, colName);
     }
-    const snap = await withTimeout(getDocs(q), 3500, `Fetch ${colName}`);
+    const snap = await withTimeout(getDocs(q), 1800, `Fetch ${colName}`);
     if (snap && !snap.empty) {
       return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     }
@@ -436,7 +436,7 @@ async function safeQueryDocs(colName, sortField, sortDir = 'asc') {
   } catch (err) {
     console.warn(`[safeQueryDocs] ${colName} read warning:`, err?.message || err);
     try {
-      const snap = await withTimeout(getDocs(collection(db, colName)), 2000, `Fallback ${colName}`);
+      const snap = await withTimeout(getDocs(collection(db, colName)), 1200, `Fallback ${colName}`);
       if (snap && !snap.empty) {
         return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       }
@@ -877,12 +877,18 @@ export async function deleteFaq(faqId, adminEmail) {
 // =============================================================================
 
 export async function getHeroSlides() {
-  const cloud = await safeQueryDocs('cms_hero', 'order', 'asc');
-  const merged = mergeCloudWithDefaults(INITIAL_HERO_SLIDES, cloud, {
-    type: 'hero',
-  });
-  setLocal(KEY_HERO, merged);
-  return merged;
+  const cached = getLocal(KEY_HERO, null);
+  try {
+    const cloud = await safeQueryDocs('cms_hero', 'order', 'asc');
+    if (cloud) {
+      const merged = mergeCloudWithDefaults(INITIAL_HERO_SLIDES, cloud, {
+        type: 'hero',
+      });
+      setLocal(KEY_HERO, merged);
+      return merged;
+    }
+  } catch {}
+  return cached && cached.length > 0 ? cached : INITIAL_HERO_SLIDES;
 }
 
 export async function saveHeroSlide(slide, adminEmail) {
