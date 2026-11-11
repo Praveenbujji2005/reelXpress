@@ -43,7 +43,7 @@ export default function FAQItem({ faq, isOpen, onToggle, index }) {
         isOpen
           ? 'bg-[#faf4ee] border-[#dfc4b5] shadow-[0_4px_16px_rgba(41,23,15,0.07)]'
           : 'bg-[#f8f1ec] border-[#ebded5] shadow-[0_2px_8px_rgba(41,23,15,0.04)] hover:bg-[#fffcf9] hover:border-[#dfc4b5] hover:-translate-y-0.5 hover:shadow-[0_4px_14px_rgba(41,23,15,0.06)]'
-      } p-3.5 sm:p-4.5`}
+      } p-3.5 sm:p-4 md:p-5`}
     >
       {/* Question Trigger Button */}
       <button

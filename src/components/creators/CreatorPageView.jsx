@@ -249,7 +249,7 @@ export default function CreatorPageView() {
         {/* ==========================================================================
             2. WHY JOIN REELXPRESS? (8 Feature Perks)
             ========================================================================== */}
-        <section id="perks" className="py-16 md:py-24 px-6 md:px-margin max-w-[1440px] mx-auto">
+        <section id="perks" className="py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-bold mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
@@ -304,7 +304,7 @@ export default function CreatorPageView() {
         {/* ==========================================================================
             3. WHO CAN APPLY? (6 Requirements + Callout Banner)
             ========================================================================== */}
-        <section id="eligibility" className="py-16 md:py-24 px-6 md:px-margin max-w-[1440px] mx-auto">
+        <section id="eligibility" className="py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28">
           <div className="rounded-3xl bg-surface-deep/90 border border-border-amber/60 backdrop-blur-2xl p-8 sm:p-12 lg:p-16 shadow-[0_20px_80px_rgba(0,0,0,0.7)] relative overflow-hidden">
             {/* Top Amber Light */}
             <div className="absolute top-0 right-1/4 w-96 h-48 bg-primary-container/20 blur-3xl pointer-events-none rounded-full" />
@@ -375,7 +375,7 @@ export default function CreatorPageView() {
         {/* ==========================================================================
             4. THE JOURNEY (5 Simple Steps)
             ========================================================================== */}
-        <section id="journey" className="py-16 md:py-24 px-6 md:px-margin max-w-[1440px] mx-auto">
+        <section id="journey" className="py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-bold mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
@@ -433,7 +433,7 @@ export default function CreatorPageView() {
         {/* ==========================================================================
             5. REAL STORIES, REAL EARNINGS (Creator Proof)
             ========================================================================== */}
-        <section id="stories" className="py-16 md:py-24 px-6 md:px-margin max-w-[1440px] mx-auto">
+        <section id="stories" className="py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-bold mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
@@ -496,7 +496,7 @@ export default function CreatorPageView() {
         {/* ==========================================================================
             6. READY TO START? (Interactive Creator Waiting List Form)
             ========================================================================== */}
-        <section id="apply" className="py-16 md:py-24 px-6 md:px-margin max-w-[1440px] mx-auto">
+        <section id="apply" className="py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28">
           <div className="max-w-3xl mx-auto rounded-3xl bg-surface-base/90 border border-border-amber backdrop-blur-2xl p-8 sm:p-12 shadow-[0_20px_80px_rgba(255,109,41,0.25)] relative overflow-hidden">
             {/* Ambient Background Light */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-primary-container/15 blur-3xl rounded-full pointer-events-none" />
@@ -695,7 +695,7 @@ export default function CreatorPageView() {
         {/* ==========================================================================
             7. GOT QUESTIONS? (Frequently Asked Questions Accordion)
             ========================================================================== */}
-        <section id="faq" className="py-16 md:py-24 px-6 md:px-margin max-w-4xl mx-auto">
+        <section id="faq" className="py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-4xl mx-auto scroll-mt-20 md:scroll-mt-28">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-bold mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />

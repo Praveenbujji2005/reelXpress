@@ -21,7 +21,7 @@ export default function Hero({ onOpenModal, onShowToast }) {
     <section
       id="hero"
       aria-label="ReelXpress Hero"
-      className="relative pt-10 md:pt-16 pb-12 sm:pb-16 px-4 sm:px-6 md:px-margin w-full max-w-[1600px] mx-auto text-center flex flex-col items-center overflow-visible"
+      className="relative pt-10 md:pt-16 pb-12 sm:pb-16 px-4 sm:px-6 md:px-margin w-full max-w-[1600px] mx-auto text-center flex flex-col items-center overflow-visible scroll-mt-20 md:scroll-mt-28"
     >
       {/* Subtle Grid Pattern Overlay */}
       <div
@@ -31,15 +31,15 @@ export default function Hero({ onOpenModal, onShowToast }) {
 
       {/* Main Headline */}
       <h1 className="reveal-on-scroll text-white w-full max-w-6xl mx-auto mb-6 sm:mb-8 select-none text-center">
-        <span className="inline-flex items-center justify-center whitespace-nowrap text-[clamp(15px,4.3vw,52px)] font-extrabold tracking-tight leading-[1.2]">
-          <span>Shoot The Moment</span>
+        <span className="inline-flex flex-wrap items-center justify-center text-[clamp(15px,4.3vw,52px)] font-extrabold tracking-tight leading-[1.2]">
+          <span className="whitespace-nowrap">Shoot The Moment</span>
           <img
             src="/brand/reelxpress-gold-x.png"
             alt="reelXpress Mark"
             className="inline-block h-[0.88em] w-auto mx-1.5 sm:mx-2.5 md:mx-3 object-contain drop-shadow-[0_0_12px_rgba(255,200,60,0.45)] shrink-0 select-none"
             loading="eager"
           />
-          <span>Own The Spotlight</span>
+          <span className="whitespace-nowrap">Own The Spotlight</span>
         </span>
         <span className="block mt-2 sm:mt-3 text-[clamp(20px,5.4vw,62px)] font-black tracking-tight leading-[1.15] text-shimmer text-primary-container">
           We Deliver The Reel.
@@ -73,7 +73,7 @@ export default function Hero({ onOpenModal, onShowToast }) {
           - Video carousel sits openly and seamlessly on the hero section background
           - Preserves #showcase anchor for navbar navigation
          ========================================================================= */}
-      <div id="showcase" className="reveal-scale-on-scroll relative w-full max-w-7xl mx-auto mb-10 sm:mb-14 overflow-visible">
+      <div id="showcase" className="reveal-scale-on-scroll relative w-full max-w-7xl mx-auto mb-10 sm:mb-14 overflow-visible scroll-mt-20 md:scroll-mt-28">
         {/* Ambient Warm Radial Glow Behind Showcase (Toned Down) */}
         <div
           className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[620px] md:w-[920px] h-[340px] sm:h-[480px] rounded-full bg-gradient-to-br from-[#ff6d29]/10 via-[#5c1d00]/05 to-transparent blur-3xl pointer-events-none -z-10"

@@ -230,7 +230,7 @@ const WEDDING_PACKAGES = [
 // SKELETON LOADER FOR PRICING CARDS
 function PricingCardSkeleton({ count = 4, colsClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' }) {
   return (
-    <div className={`grid ${colsClass} gap-3.5 sm:gap-4.5 mb-14`}>
+    <div className={`grid ${colsClass} gap-3.5 sm:gap-4 lg:gap-5 mb-14`}>
       {Array.from({ length: count }).map((_, idx) => (
         <div
           key={`pricing-skel-${idx}`}
@@ -367,16 +367,16 @@ export default function PricingSection() {
   };
 
   return (
-    <section className="relative py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto" id="pricing">
+    <section className="relative py-16 md:py-24 px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28" id="pricing">
       {/* Static Atmospheric Radial Ambient in Brand Orange */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[340px] bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(255,109,41,0.16),transparent_70%)] pointer-events-none -z-10" />
 
       {/* 1. Pill Switcher Bar (Fully Keyboard Accessible) */}
-      <div className="flex justify-center mb-10 sm:mb-14 px-1">
+      <div className="flex justify-center mb-10 sm:mb-14 px-2 overflow-x-auto no-scrollbar">
         <div
           role="tablist"
           aria-label="Pricing Categories"
-          className="inline-flex items-center p-1 sm:p-1.5 rounded-full bg-[#181216] border border-white/10 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] gap-0.5 sm:gap-1 max-w-full select-none"
+          className="inline-flex items-center p-1 sm:p-1.5 rounded-full bg-[#181216] border border-white/10 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] gap-0.5 sm:gap-1 max-w-full select-none shrink-0"
         >
           {TABS.map((tab, idx) => {
             const isActive = activeTab === tab.id;
@@ -485,7 +485,7 @@ export default function PricingSection() {
               role="tabpanel"
               id="tabpanel-instant"
               aria-labelledby="tab-instant"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5 mb-14 fade-in-content"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5 mb-14 fade-in-content"
             >
           {instantPlans.map((pkg, idx) => (
             <div
@@ -683,7 +683,7 @@ export default function PricingSection() {
           role="tabpanel"
           id="tabpanel-wedding"
           aria-labelledby="tab-wedding"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4.5 mb-14 fade-in-content"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5 mb-14 fade-in-content"
         >
           {weddingPlans.map((pkg, idx) => (
             <div

@@ -96,7 +96,7 @@ export default function FaqSection() {
 
   return (
     <section
-      className="py-16 md:py-space-2xl px-6 md:px-margin max-w-[1440px] mx-auto relative select-none"
+      className="py-16 md:py-space-2xl px-6 md:px-margin max-w-[1440px] mx-auto relative select-none scroll-mt-20 md:scroll-mt-28"
       id="faq"
       aria-label="Frequently Asked Questions"
     >
@@ -157,7 +157,7 @@ export default function FaqSection() {
               {[1, 2, 3, 4, 5].map((n) => (
                 <div
                   key={n}
-                  className="rounded-xl p-3.5 sm:p-4.5 bg-[#181216] border border-white/5 flex items-center justify-between ambient-skeleton shadow-sm min-h-[58px]"
+                  className="rounded-xl p-3.5 sm:p-4 md:p-5 bg-[#181216] border border-white/5 flex items-center justify-between ambient-skeleton shadow-sm min-h-[58px]"
                 >
                   <div className="w-3/4 h-5 rounded-md bg-white/10 ambient-pulse" />
                   <div className="w-7 h-7 rounded-full bg-white/10 shrink-0 ambient-pulse" />

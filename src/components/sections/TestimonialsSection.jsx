@@ -22,7 +22,7 @@ import { getTestimonials, getCachedTestimonials } from '@/lib/cmsServices';
 // SKELETON PLACEHOLDER FOR TESTIMONIAL CARDS
 function TestimonialCardSkeleton() {
   return (
-    <div className="w-[266px] sm:w-[304px] md:w-[323px] h-[200px] rounded-2xl p-4.5 sm:p-5 md:p-6 bg-[#161217] border border-white/10 flex flex-col justify-between ambient-skeleton shrink-0 shadow-lg">
+    <div className="w-[260px] xs:w-[280px] sm:w-[304px] md:w-[323px] h-[200px] rounded-2xl p-4 sm:p-5 md:p-6 bg-[#161217] border border-white/10 flex flex-col justify-between ambient-skeleton shrink-0 shadow-lg">
       <div>
         <div className="flex gap-1.5 mb-3">
           {[1, 2, 3, 4, 5].map((s) => (
@@ -113,16 +113,16 @@ export default function TestimonialsSection() {
 
   return (
     <section
-      className="py-16 md:py-space-2xl overflow-hidden relative select-none"
+      className="py-16 md:py-space-2xl overflow-hidden relative select-none scroll-mt-20 md:scroll-mt-28"
       id="testimonials"
       aria-label="Client Testimonials"
     >
       {/* Section Header */}
-      <div className="reveal-on-scroll text-center max-w-3xl mx-auto mb-12 md:mb-16 px-6">
+      <div className="reveal-on-scroll text-center max-w-3xl mx-auto mb-10 md:mb-16 px-4 sm:px-6">
         <span className="text-primary text-label-md font-label-md uppercase tracking-wider block mb-2 font-bold">
           TESTIMONIALS
         </span>
-        <h2 className="text-headline-lg font-headline-lg text-text-primary tracking-tight">
+        <h2 className="text-2xl sm:text-3xl md:text-headline-lg font-headline-lg text-text-primary tracking-tight">
           Insights from Satisfied Clients
         </h2>
         <p className="text-body-md font-body-md text-text-muted mt-3 max-w-2xl mx-auto leading-relaxed">
@@ -134,11 +134,11 @@ export default function TestimonialsSection() {
       <div className="relative w-full overflow-hidden">
         {/* Edge Gradient Masks for Smooth Fade Out on Left & Right */}
         <div
-          className="absolute left-0 inset-y-0 w-16 sm:w-32 md:w-48 bg-gradient-to-r from-background via-background/80 to-transparent z-10 pointer-events-none"
+          className="absolute left-0 inset-y-0 w-8 sm:w-24 md:w-40 bg-gradient-to-r from-background via-background/70 to-transparent z-10 pointer-events-none"
           aria-hidden="true"
         />
         <div
-          className="absolute right-0 inset-y-0 w-16 sm:w-32 md:w-48 bg-gradient-to-l from-background via-background/80 to-transparent z-10 pointer-events-none"
+          className="absolute right-0 inset-y-0 w-8 sm:w-24 md:w-40 bg-gradient-to-l from-background via-background/70 to-transparent z-10 pointer-events-none"
           aria-hidden="true"
         />
 

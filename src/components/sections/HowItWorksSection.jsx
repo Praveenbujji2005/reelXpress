@@ -5,12 +5,12 @@ import { HOW_IT_WORKS_STEPS } from '@/lib/data';
 // 5-step frictionless workflow from booking to instant delivery with animated energy line
 export default function HowItWorksSection() {
   return (
-    <section className="py-16 md:py-space-2xl px-6 md:px-margin max-w-[1440px] mx-auto">
+    <section className="py-16 md:py-space-2xl px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto">
       <div className="reveal-on-scroll text-center max-w-2xl mx-auto mb-16">
         <span className="text-primary text-label-md font-label-md uppercase tracking-wider block mb-2 font-bold">
           Frictionless Workflow
         </span>
-        <h2 className="text-headline-lg font-headline-lg text-text-primary">
+        <h2 className="text-2xl sm:text-3xl md:text-headline-lg font-headline-lg text-text-primary">
           <span>How </span>
           <img
             src="/brand/reelxpress-wordmark-white-hd.png"

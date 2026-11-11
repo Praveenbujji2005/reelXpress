@@ -147,18 +147,18 @@ export default function BookingSection({ onBookingSuccess }) {
   };
 
   return (
-    <section className="py-16 md:py-space-2xl px-6 md:px-margin max-w-[1440px] mx-auto" id="booking">
+    <section className="py-16 md:py-space-2xl px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28" id="booking">
       
       {/* Express Network Banner */}
-      <div className="reveal-scale-on-scroll rounded-3xl bg-surface-glass-tinted border border-border-amber backdrop-blur-2xl p-8 md:p-14 shadow-[0_20px_80px_rgba(255,109,41,0.25)] mb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="reveal-scale-on-scroll rounded-3xl bg-surface-glass-tinted border border-border-amber backdrop-blur-2xl p-5 sm:p-8 md:p-14 shadow-[0_20px_80px_rgba(255,109,41,0.25)] mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/20 border border-border-amber text-primary text-label-sm font-label-sm uppercase tracking-widest mb-4">
               <span className="w-2 h-2 rounded-full bg-primary rec-indicator" />
               <span>JOIN THE EXPRESS NETWORK</span>
             </div>
-            <h2 className="text-headline-lg font-headline-lg text-text-primary mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-headline-lg font-headline-lg text-text-primary mb-4 leading-tight">
               The fastest creative community for modern creators.
             </h2>
             <p className="text-body-lg font-body-lg text-text-muted mb-8 leading-relaxed">

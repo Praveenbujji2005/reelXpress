@@ -67,7 +67,7 @@ export default function BookingModal({ isOpen, bookingDetails, onClose }) {
       aria-labelledby="booking-modal-title"
     >
       <div
-        className={`relative w-full max-w-md rounded-3xl bg-surface-deep border border-border-amber p-8 text-center shadow-[0_30px_100px_rgba(255,109,41,0.4)] transform transition-all duration-300 ${
+        className={`relative w-full max-w-md rounded-3xl bg-surface-deep border border-border-amber p-6 sm:p-8 text-center shadow-[0_30px_100px_rgba(255,109,41,0.4)] transform transition-all duration-300 ${
           isOpen ? 'scale-100' : 'scale-95'
         }`}
       >

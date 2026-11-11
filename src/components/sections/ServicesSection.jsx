@@ -5,12 +5,12 @@ import { WHY_REELXPRESS_DATA } from '@/lib/data';
 // "Why ReelXpress?" Section: The high-speed edge for your vertical storytelling
 export default function ServicesSection() {
   return (
-    <section className="py-16 md:py-space-2xl px-6 md:px-margin max-w-[1440px] mx-auto" id="services">
+    <section className="py-16 md:py-space-2xl px-4 sm:px-6 md:px-margin max-w-[1440px] mx-auto scroll-mt-20 md:scroll-mt-28" id="services">
       <div className="reveal-on-scroll text-center max-w-2xl mx-auto mb-16">
         <span className="text-primary text-label-md font-label-md uppercase tracking-wider block mb-2 font-bold">
           The Advantage
         </span>
-        <h2 className="text-headline-lg font-headline-lg text-text-primary">
+        <h2 className="text-2xl sm:text-3xl md:text-headline-lg font-headline-lg text-text-primary">
           <span>Why </span>
           <span className="inline-flex items-center align-middle whitespace-nowrap">
             <img
