@@ -63,7 +63,10 @@ export default function HomePage() {
   return (
     <>
       {/* Top Navbar */}
-      <Navbar onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
+      <Navbar
+        onOpenMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
+        isMobileMenuOpen={isMobileMenuOpen}
+      />
 
       {/* Mobile Drawer Menu */}
       <MobileMenu

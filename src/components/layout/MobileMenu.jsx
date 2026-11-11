@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { NAV_LINKS } from '@/lib/data';
+import { SITE_CONFIG } from '@/config/site';
 
-// Slide-down mobile navigation drawer with backdrop, scroll-lock and high-contrast touch targets
+/**
+ * Slide-down mobile navigation drawer with backdrop, scroll-lock and high-contrast touch targets
+ */
 export default function MobileMenu({ isOpen, onClose }) {
   const [mounted, setMounted] = useState(false);
 
@@ -24,33 +27,45 @@ export default function MobileMenu({ isOpen, onClose }) {
     }
   }, [isOpen, onClose]);
 
-  // Lock body scroll when mobile menu is open to prevent background scrolling
+  // Lock body scroll when mobile menu is open to prevent background scrolling, restore cleanly
   useEffect(() => {
     if (isOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
-        document.body.style.overflow = originalOverflow;
+        document.body.style.overflow = originalOverflow || '';
       };
+    } else {
+      document.body.style.overflow = '';
     }
   }, [isOpen]);
 
   const handleLinkClick = (href) => {
     onClose();
-    if (href.startsWith('/#') && typeof window !== 'undefined') {
-      const hash = href.substring(1);
-      const targetElement = document.querySelector(hash);
-      if (targetElement) {
-        setTimeout(() => {
+
+    if (typeof window === 'undefined') return;
+
+    let targetSelector = null;
+    if (href.startsWith('#')) {
+      targetSelector = href;
+    } else if (href.startsWith('/#')) {
+      targetSelector = href.substring(1);
+    }
+
+    if (targetSelector) {
+      setTimeout(() => {
+        const targetElement = document.querySelector(targetSelector);
+        if (targetElement) {
+          const header = document.querySelector('header');
+          const headerOffset = header ? header.offsetHeight + 24 : 88;
           if (window.lenis) {
-            const header = document.querySelector('header');
-            const headerOffset = header ? header.offsetHeight + 24 : 88;
-            window.lenis.scrollTo(targetElement, { offset: -headerOffset, duration: 1.2 });
+            window.lenis.scrollTo(targetElement, { offset: -headerOffset, duration: 1.0 });
           } else {
-            targetElement.scrollIntoView({ behavior: 'smooth' });
+            const y = targetElement.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
           }
-        }, 150);
-      }
+        }
+      }, 180);
     }
   };
 
@@ -76,30 +91,35 @@ export default function MobileMenu({ isOpen, onClose }) {
         }`}
         role="dialog"
         aria-modal="true"
+        aria-label="Mobile Navigation Drawer"
       >
-        <div className="rounded-3xl bg-surface-deep/98 border border-border-amber backdrop-blur-2xl p-5 sm:p-6 shadow-2xl space-y-4">
-          
-          <div className="flex items-center justify-between pb-3 border-b border-border-specular">
+        <div className="rounded-3xl bg-[#161217]/98 border border-white/15 backdrop-blur-2xl p-5 sm:p-6 shadow-2xl space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <Link
               href="/"
               onClick={() => handleLinkClick('/')}
               className="flex items-center min-h-[44px]"
-              aria-label="reelXpress Home"
+              aria-label={`${SITE_CONFIG.name} Home`}
             >
               <img
                 src="/brand/reelxpress-nav-logo.png"
-                alt="reelXpress Logo"
+                alt={`${SITE_CONFIG.name} Logo`}
+                width={120}
+                height={28}
                 className="h-7 w-auto object-contain drop-shadow-[0_0_12px_rgba(255,109,41,0.4)]"
               />
             </Link>
-            {/* 44x44px touch target close button */}
+
+            {/* 48x48px touch target close button */}
             <button
               type="button"
               onClick={onClose}
               aria-label="Close Menu"
-              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-surface-container border border-border-specular flex items-center justify-center text-text-muted hover:text-text-primary active:scale-90 cursor-pointer touch-manipulation"
+              className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-text-muted hover:text-white active:scale-90 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container"
             >
-              <span className="material-symbols-outlined text-xl">close</span>
+              <svg className="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 
@@ -109,10 +129,12 @@ export default function MobileMenu({ isOpen, onClose }) {
                 key={link.label}
                 href={link.href}
                 onClick={() => handleLinkClick(link.href)}
-                className="text-title-md font-bold text-text-primary hover:text-primary-container active:bg-white/5 rounded-xl px-2 py-3 border-b border-border-specular/40 flex items-center justify-between min-h-[48px] touch-manipulation"
+                className="text-base font-bold text-white hover:text-primary-container active:bg-white/5 rounded-xl px-3 py-3 border-b border-white/5 flex items-center justify-between min-h-[48px] touch-manipulation transition-colors"
               >
                 <span>{link.label}</span>
-                <span className="material-symbols-outlined text-sm text-text-muted">arrow_forward_ios</span>
+                <svg className="w-4 h-4 text-white/40 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             ))}
 
@@ -124,13 +146,14 @@ export default function MobileMenu({ isOpen, onClose }) {
                   window.dispatchEvent(new CustomEvent('open-contact-modal'));
                 }
               }}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-primary-container text-white font-bold text-title-md shadow-[0_0_25px_rgba(255,109,41,0.5)] mt-3 cursor-pointer min-h-[50px] touch-manipulation active:scale-95 transition-transform"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-primary-container text-white font-bold text-base shadow-[0_0_25px_rgba(255,109,41,0.5)] mt-3 cursor-pointer min-h-[50px] touch-manipulation active:scale-95 transition-transform"
             >
               <span>Book Now</span>
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              <svg className="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </button>
           </div>
-
         </div>
       </div>
     </>
