@@ -5,11 +5,9 @@ import {
   updateCreatorQueryStatusInFirestore,
   deleteCreatorQueryFromFirestore,
   validateCreatorQueryData,
-  normalizeCreatorQuery,
 } from '@/lib/creatorQueries';
 import {
   readServerCreatorQueries,
-  writeServerCreatorQueries,
   saveServerCreatorQuery,
   updateServerCreatorQueryStatus,
   deleteServerCreatorQuery,

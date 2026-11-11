@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import MobileMenu from '@/components/layout/MobileMenu';
 import Footer from '@/components/layout/Footer';
 import StatCard from '@/components/hero/StatCard';
-import BookingModal from '@/components/ui/BookingModal';
-import ToastNotification from '@/components/ui/ToastNotification';
 import { WHY_REELXPRESS_DATA } from '@/lib/data';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -15,32 +13,6 @@ export default function ReelXpressPageView() {
   useScrollReveal();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [confirmedBooking, setConfirmedBooking] = useState(null);
-
-  const [toast, setToast] = useState({
-    visible: false,
-    title: '',
-    message: '',
-    icon: 'check_circle',
-  });
-
-  const showToast = useCallback((toastData) => {
-    setToast({
-      visible: true,
-      title: toastData.title,
-      message: toastData.message || '',
-      icon: toastData.icon || 'check_circle',
-    });
-    setTimeout(() => {
-      setToast((prev) => ({ ...prev, visible: false }));
-    }, 3200);
-  }, []);
-
-  const handleBookingSuccess = useCallback((details) => {
-    setConfirmedBooking(details);
-    setIsBookingModalOpen(true);
-  }, []);
 
   const COMPARISON_ROWS = [
     {
@@ -320,14 +292,6 @@ export default function ReelXpressPageView() {
       </main>
 
       <Footer />
-
-      <BookingModal
-        isOpen={isBookingModalOpen}
-        bookingDetails={confirmedBooking}
-        onClose={() => setIsBookingModalOpen(false)}
-      />
-
-      <ToastNotification toast={toast} />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { db, isFirebaseConfigured, firebaseConfig } from './firebase';
+import { db, firebaseConfig } from './firebase';
 import {
   collection,
   addDoc,
@@ -279,6 +279,9 @@ export async function createCreatorQuery(queryData) {
   }
 
   // Fallback ID if Firestore is currently initializing
+  if (!savedDocId && lastError) {
+    console.warn('[Firestore] Creator query saved locally; cloud sync pending:', lastError?.message);
+  }
   const finalId = savedDocId || `creator_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const normalized = normalizeCreatorQuery(finalId, {
     ...docPayload,
@@ -404,7 +407,7 @@ export async function updateCreatorQueryStatusInFirestore(id, newStatus, adminEm
 /**
  * Delete a creator query document from Firestore
  */
-export async function deleteCreatorQueryFromFirestore(id, adminEmail = 'admin@reelxpress.com') {
+export async function deleteCreatorQueryFromFirestore(id) {
   let deleted = false;
 
   if (db) {

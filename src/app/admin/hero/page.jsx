@@ -91,7 +91,7 @@ export default function AdminHeroPage() {
       setSlideToDelete(null);
       await fetchSlides();
     } catch (err) {
-      alert('Failed to delete slide.');
+      alert('Failed to delete slide: ' + (err?.message || 'Unknown error'));
     }
   };
 

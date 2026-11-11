@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   subscribeToEnquiries,
-  getEnquiriesFromFirestore,
 } from '@/lib/enquiries';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 

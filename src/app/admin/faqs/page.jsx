@@ -79,7 +79,7 @@ export default function AdminFaqsPage() {
       setFaqToDelete(null);
       await fetchFaqs();
     } catch (err) {
-      alert('Failed to delete FAQ.');
+      alert('Failed to delete FAQ: ' + (err?.message || 'Unknown error'));
     }
   };
 

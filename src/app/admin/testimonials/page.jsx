@@ -99,7 +99,7 @@ export default function AdminTestimonialsPage() {
       setTestimonialToDelete(null);
       await fetchList();
     } catch (err) {
-      alert('Failed to delete testimonial.');
+      alert('Failed to delete testimonial: ' + (err?.message || 'Unknown error'));
     }
   };
 

@@ -226,7 +226,7 @@ export async function GET(request) {
   }
 }
 
-export async function PUT(request) {
+export async function PUT() {
   try {
     const list = readServerEnquiries();
     const unsynced = list.filter((item) => !item.cloudSynced);

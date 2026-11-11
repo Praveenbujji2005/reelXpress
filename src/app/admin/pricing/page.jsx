@@ -103,7 +103,7 @@ export default function AdminPricingPage() {
       setPlanToDelete(null);
       await fetchPlans();
     } catch (err) {
-      alert('Failed to delete plan.');
+      alert('Failed to delete plan: ' + (err?.message || 'Unknown error'));
     }
   };
 

@@ -12,7 +12,7 @@ import React, { useState, useEffect, useRef } from 'react';
  * - Uppercase letter-spaced muted descriptor
  * - Star icon badge for rating
  */
-export default function StatCard({ value, label, hasStar = false, starRating = '4.8' }) {
+export default function StatCard({ value, label, hasStar = false }) {
   const cardRef = useRef(null);
   const [displayValue, setDisplayValue] = useState(value);
   const hasAnimatedRef = useRef(false);

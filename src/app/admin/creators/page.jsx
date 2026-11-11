@@ -13,14 +13,10 @@ export default function AdminCreatorsPage() {
   const { user } = useAdminAuth();
   const [creators, setCreators] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorNotice, setErrorNotice] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [syncing, setSyncing] = useState(false);
 
   // Search & Filters
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [deviceFilter, setDeviceFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -126,13 +122,6 @@ export default function AdminCreatorsPage() {
       );
     }
 
-    // Device filter
-    if (deviceFilter !== 'all') {
-      result = result.filter((c) =>
-        (c.phoneModel || c.device || '').toLowerCase().includes(deviceFilter.toLowerCase())
-      );
-    }
-
     // Search query
     if (search.trim()) {
       const q = search.toLowerCase().trim();
@@ -164,7 +153,7 @@ export default function AdminCreatorsPage() {
     });
 
     return result;
-  }, [creators, statusFilter, deviceFilter, search, sortBy]);
+  }, [creators, statusFilter, search, sortBy]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredCreators.length / PAGE_SIZE) || 1;
