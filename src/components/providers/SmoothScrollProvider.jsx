@@ -25,8 +25,8 @@ export default function SmoothScrollProvider({ children }) {
       } catch {}
     }
 
-    // Safety clear any stuck body scroll-locks on initial mount
-    if (typeof document !== 'undefined') {
+    // Safety clear any stuck body scroll-locks on initial mount (unless full-screen loader is active)
+    if (typeof document !== 'undefined' && !document.getElementById('reelxpress-pro-loader')) {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     }

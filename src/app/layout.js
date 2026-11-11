@@ -2,6 +2,7 @@ import { Plus_Jakarta_Sans, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { SITE_CONFIG } from '@/config/site';
 import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
+import FullScreenLoader from '@/components/ui/FullScreenLoader';
 import AmbientOrbs from '@/components/ui/AmbientOrbs';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
@@ -103,6 +104,9 @@ export default function RootLayout({ children }) {
         className={`${cormorantGaramond.variable} bg-background text-text-primary antialiased selection:bg-primary-container selection:text-text-primary min-h-screen min-h-[100dvh] relative font-sans`}
         suppressHydrationWarning
       >
+        {/* Full-Screen ReelXpress Pro Loading Experience */}
+        <FullScreenLoader />
+
         <ErrorBoundary>
           <SmoothScrollProvider>
             {/* Top GPU Scroll Progress Bar */}
